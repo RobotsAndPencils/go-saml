@@ -24,6 +24,26 @@ import (
 	"github.com/RobotsAndPencils/go-saml/util"
 )
 
+func ParseCompressedEncodedRequest(b64RequestXML string) (*AuthnRequest, error) {
+	var authnRequest AuthnRequest
+	compressedXML, err := base64.StdEncoding.DecodeString(b64RequestXML)
+	if err != nil {
+		return nil, err
+	}
+	bXML := util.Decompress(compressedXML)
+
+	err = xml.Unmarshal(bXML, &authnRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	// There is a bug with XML namespaces in Go that's causing XML attributes with colons to not be roundtrip
+	// marshal and unmarshaled so we'll keep the original string around for validation.
+	authnRequest.originalString = string(bXML)
+	return &authnRequest, nil
+
+}
+
 func ParseEncodedRequest(b64RequestXML string) (*AuthnRequest, error) {
 	authnRequest := AuthnRequest{}
 	bytesXML, err := base64.StdEncoding.DecodeString(b64RequestXML)
@@ -225,5 +245,15 @@ func (r *AuthnRequest) EncodedSignedString(privateKeyPath string) (string, error
 		return "", err
 	}
 	b64XML := base64.StdEncoding.EncodeToString([]byte(signed))
+	return b64XML, nil
+}
+
+func (r *AuthnRequest) CompressedEncodedSignedString(privateKeyPath string) (string, error) {
+	signed, err := r.SignedString(privateKeyPath)
+	if err != nil {
+		return "", err
+	}
+	compressed := util.Compress([]byte(signed))
+	b64XML := base64.StdEncoding.EncodeToString(compressed)
 	return b64XML, nil
 }
