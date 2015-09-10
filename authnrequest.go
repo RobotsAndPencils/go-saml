@@ -257,3 +257,22 @@ func (r *AuthnRequest) CompressedEncodedSignedString(privateKeyPath string) (str
 	b64XML := base64.StdEncoding.EncodeToString(compressed)
 	return b64XML, nil
 }
+
+func (r *AuthnRequest) EncodedString() (string, error) {
+	saml, err := r.String()
+	if err != nil {
+		return "", err
+	}
+	b64XML := base64.StdEncoding.EncodeToString([]byte(saml))
+	return b64XML, nil
+}
+
+func (r *AuthnRequest) CompressedEncodedString() (string, error) {
+	saml, err := r.String()
+	if err != nil {
+		return "", err
+	}
+	compressed := util.Compress([]byte(saml))
+	b64XML := base64.StdEncoding.EncodeToString(compressed)
+	return b64XML, nil
+}

@@ -12,6 +12,7 @@ type ServiceProviderSettings struct {
 	IDPSSODescriptorURL         string
 	IDPPublicCertPath           string
 	AssertionConsumerServiceURL string
+        SPSignRequest               bool
 
 	hasInit       bool
 	publicCert    string
@@ -28,14 +29,16 @@ func (s *ServiceProviderSettings) Init() (err error) {
 	}
 	s.hasInit = true
 
-	s.publicCert, err = util.LoadCertificate(s.PublicCertPath)
-	if err != nil {
-		panic(err)
-	}
+        if s.SPSignRequest {
+		s.publicCert, err = util.LoadCertificate(s.PublicCertPath)
+		if err != nil {
+			panic(err)
+		}
 
-	s.privateKey, err = util.LoadCertificate(s.PrivateKeyPath)
-	if err != nil {
-		panic(err)
+		s.privateKey, err = util.LoadCertificate(s.PrivateKeyPath)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	s.iDPPublicCert, err = util.LoadCertificate(s.IDPPublicCertPath)

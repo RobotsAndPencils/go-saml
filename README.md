@@ -9,7 +9,7 @@ Inspired by the early work of [Matt Baird](https://github.com/mattbaird/gosaml).
 
 The library supports:
 
-* generating signed AuthnRequests
+* generating signed/unsigned AuthnRequests
 * validating signed AuthnRequests
 * generating service provider metadata
 * generating signed Responses
@@ -40,6 +40,7 @@ sp := saml.ServiceProviderSettings{
   IDPSSOURL:                   "http://idp/saml2",
   IDPSSODescriptorURL:         "http://idp/issuer",
   IDPPublicCertPath:           "idpcert.crt",
+  SPSignRequest:               "true",
   AssertionConsumerServiceURL: "http://localhost:8000/saml_consume",
 }
 sp.Init()
