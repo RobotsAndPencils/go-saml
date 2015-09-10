@@ -91,7 +91,7 @@ func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 }
 
 // GetAuthnRequestURL generate a URL for the AuthnRequest to the IdP with the SAMLRequst parameter encoded
-func GetAuthnRequestURL(baseURL string, b64XML string) (string, error) {
+func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return "", err
@@ -99,6 +99,7 @@ func GetAuthnRequestURL(baseURL string, b64XML string) (string, error) {
 
 	q := u.Query()
 	q.Add("SAMLRequest", b64XML)
+	q.Add("RelayState", state)
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
