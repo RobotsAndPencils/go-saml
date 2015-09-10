@@ -15,6 +15,7 @@ func TestGetSignedRequest(t *testing.T) {
 		IDPSSODescriptorURL:         "http://www.onelogin.net",
 		IDPPublicCertPath:           "./default.crt",
 		AssertionConsumerServiceURL: "http://localhost:8000/auth/saml/name",
+		SPSignRequest:               true,
 	}
 	err := sp.Init()
 	assert.NoError(err)
@@ -27,4 +28,22 @@ func TestGetSignedRequest(t *testing.T) {
 
 	err = VerifyRequestSignature(signedXML, sp.PublicCertPath)
 	assert.NoError(err)
+}
+
+func TestGetUnsignedRequest(t *testing.T) {
+	assert := assert.New(t)
+	sp := ServiceProviderSettings{
+		IDPSSOURL:                   "http://www.onelogin.net",
+		IDPSSODescriptorURL:         "http://www.onelogin.net",
+		IDPPublicCertPath:           "./default.crt",
+		AssertionConsumerServiceURL: "http://localhost:8000/auth/saml/name",
+		SPSignRequest:               false,
+	}
+	err := sp.Init()
+	assert.NoError(err)
+
+	// Construct an AuthnRequest
+	authnRequest := sp.GetAuthnRequest()
+	assert.NoError(err)
+	assert.NotEmpty(authnRequest)
 }
