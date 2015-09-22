@@ -1,6 +1,8 @@
 go-saml
 ======
 
+[![Build Status](https://travis-ci.org/RobotsAndPencils/go-saml.svg?branch=master)](https://travis-ci.org/RobotsAndPencils/go-saml)
+
 A just good enough SAML client library written in Go. This library is by no means complete and has been developed
 to solve several specific integration efforts. However, it's a start, and it would be great to see
 it evolve into a more fleshed out implemention.
