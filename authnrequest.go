@@ -91,7 +91,7 @@ func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 }
 
 // GetAuthnRequestURL generate a URL for the AuthnRequest to the IdP with the SAMLRequst parameter encoded
-func GetAuthnRequestURL(baseURL string, b64XML string) (string, error) {
+func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return "", err
@@ -99,6 +99,7 @@ func GetAuthnRequestURL(baseURL string, b64XML string) (string, error) {
 
 	q := u.Query()
 	q.Add("SAMLRequest", b64XML)
+	q.Add("RelayState", state)
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
@@ -254,6 +255,25 @@ func (r *AuthnRequest) CompressedEncodedSignedString(privateKeyPath string) (str
 		return "", err
 	}
 	compressed := util.Compress([]byte(signed))
+	b64XML := base64.StdEncoding.EncodeToString(compressed)
+	return b64XML, nil
+}
+
+func (r *AuthnRequest) EncodedString() (string, error) {
+	saml, err := r.String()
+	if err != nil {
+		return "", err
+	}
+	b64XML := base64.StdEncoding.EncodeToString([]byte(saml))
+	return b64XML, nil
+}
+
+func (r *AuthnRequest) CompressedEncodedString() (string, error) {
+	saml, err := r.String()
+	if err != nil {
+		return "", err
+	}
+	compressed := util.Compress([]byte(saml))
 	b64XML := base64.StdEncoding.EncodeToString(compressed)
 	return b64XML, nil
 }
