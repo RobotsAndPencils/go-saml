@@ -205,7 +205,7 @@ type Response struct {
 type EncryptedAssertion struct {
 	XMLName       xml.Name
 	EncryptedData EncryptedData
-	Assertion     Assertion `xml:"Assertion`
+	Assertion     Assertion `xml:"Assertion"`
 }
 
 type EncryptedData struct {
