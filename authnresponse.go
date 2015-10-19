@@ -4,9 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"errors"
-	"time"
-
 	"github.com/RobotsAndPencils/go-saml/util"
+	"time"
 )
 
 func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
@@ -31,6 +30,7 @@ func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
 func ParseEncodedResponse(b64ResponseXML string) (*Response, error) {
 	response := Response{}
 	bytesXML, err := base64.StdEncoding.DecodeString(b64ResponseXML)
+	//dst := string(bytesXML[:])
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +38,43 @@ func ParseEncodedResponse(b64ResponseXML string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	//fmt.Printf("%+v\n", response)
 	// There is a bug with XML namespaces in Go that's causing XML attributes with colons to not be roundtrip
 	// marshal and unmarshaled so we'll keep the original string around for validation.
 	response.originalString = string(bytesXML)
-	// fmt.Println(response.originalString)
+	//fmt.Println(response.originalString)
 	return &response, nil
+}
+
+func (r *Response) IsEncrypted() bool {
+
+	//Test if exits EncryptedAssertion tag
+	if r.EncryptedAssertion.EncryptedData.EncryptionMethod.Algorithm == "" {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (r *Response) Decrypt(privateKeyPath string) (*Response, error) {
+	s := r.originalString
+
+	if r.IsEncrypted() == false {
+		return r, errors.New("missing EncryptedAssertion tag on SAML Response, is encrypted?")
+
+	}
+	plainXML, err := DecryptResponse(s, privateKeyPath)
+	if err != nil {
+		return r, err
+	}
+	err = xml.Unmarshal([]byte(plainXML), &r)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+
+	//return DecryptResponse(s, privateKeyPath)
 }
 
 func (r *Response) Validate(s *ServiceProviderSettings) error {
@@ -307,7 +338,15 @@ func (r *Response) CompressedEncodedSignedString(privateKeyPath string) (string,
 
 // GetAttribute by Name or by FriendlyName. Return blank string if not found
 func (r *Response) GetAttribute(name string) string {
-	for _, attr := range r.Assertion.AttributeStatement.Attributes {
+	attrStatement := AttributeStatement{}
+
+	if r.IsEncrypted() {
+		attrStatement = r.EncryptedAssertion.Assertion.AttributeStatement
+	} else {
+		attrStatement = r.Assertion.AttributeStatement
+	}
+
+	for _, attr := range attrStatement.Attributes {
 		if attr.Name == name || attr.FriendlyName == name {
 			return attr.AttributeValue.Value
 		}
