@@ -13,7 +13,7 @@ func (s *ServiceProviderSettings) GetEntityDescriptor() (string, error) {
 		DS:       "http://www.w3.org/2000/09/xmldsig#",
 		XMLNS:    "urn:oasis:names:tc:SAML:2.0:metadata",
 		MD:       "urn:oasis:names:tc:SAML:2.0:metadata",
-		EntityId: s.AssertionConsumerServiceURL,
+		EntityId: s.Id,
 
 		Extensions: Extensions{
 			XMLName: xml.Name{
@@ -25,6 +25,8 @@ func (s *ServiceProviderSettings) GetEntityDescriptor() (string, error) {
 		},
 		SPSSODescriptor: SPSSODescriptor{
 			ProtocolSupportEnumeration: "urn:oasis:names:tc:SAML:2.0:protocol",
+			AuthnRequestsSigned:        fmt.Sprintf("%t",s.SPSignRequest),
+			WantAssertionsSigned:        fmt.Sprintf("%t",s.IDPSignResponse),
 			SigningKeyDescriptor: KeyDescriptor{
 				XMLName: xml.Name{
 					Local: "md:KeyDescriptor",
