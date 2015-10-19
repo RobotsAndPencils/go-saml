@@ -56,23 +56,23 @@ func (r *Response) IsEncrypted() bool {
 	}
 }
 
-func (r *Response) Decrypt(privateKeyPath string) (*Response, error) {
+func (r *Response) Decrypt(privateKeyPath string) error{
 	s := r.originalString
 
 	if r.IsEncrypted() == false {
-		return r, errors.New("missing EncryptedAssertion tag on SAML Response, is encrypted?")
+		return errors.New("missing EncryptedAssertion tag on SAML Response, is encrypted?")
 
 	}
 	plainXML, err := DecryptResponse(s, privateKeyPath)
 	if err != nil {
-		return r, err
+		return err
 	}
 	err = xml.Unmarshal([]byte(plainXML), &r)
 	if err != nil {
-		return r, err
+		return err
 	}
 
-	return r, nil
+	return nil
 
 	//return DecryptResponse(s, privateKeyPath)
 }
