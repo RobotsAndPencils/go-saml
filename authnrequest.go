@@ -84,6 +84,7 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 	r := NewAuthnRequest()
 	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
+	r.Destination = s.IDPSSOURL
 	r.Issuer.Url = s.IDPSSODescriptorURL
 	r.Signature.KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
 
@@ -116,6 +117,7 @@ func NewAuthnRequest() *AuthnRequest {
 		ID:                          id,
 		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
 		Version:                     "2.0",
+		Destination:                 "", // caller must populate ar.AppSettings.Destination,
 		AssertionConsumerServiceURL: "", // caller must populate ar.AppSettings.AssertionConsumerServiceURL,
 		Issuer: Issuer{
 			XMLName: xml.Name{
@@ -255,25 +257,6 @@ func (r *AuthnRequest) CompressedEncodedSignedString(privateKeyPath string) (str
 		return "", err
 	}
 	compressed := util.Compress([]byte(signed))
-	b64XML := base64.StdEncoding.EncodeToString(compressed)
-	return b64XML, nil
-}
-
-func (r *AuthnRequest) EncodedString() (string, error) {
-	saml, err := r.String()
-	if err != nil {
-		return "", err
-	}
-	b64XML := base64.StdEncoding.EncodeToString([]byte(saml))
-	return b64XML, nil
-}
-
-func (r *AuthnRequest) CompressedEncodedString() (string, error) {
-	saml, err := r.String()
-	if err != nil {
-		return "", err
-	}
-	compressed := util.Compress([]byte(saml))
 	b64XML := base64.StdEncoding.EncodeToString(compressed)
 	return b64XML, nil
 }
