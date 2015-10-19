@@ -1,8 +1,6 @@
 go-saml
 ======
 
-[![Build Status](https://travis-ci.org/RobotsAndPencils/go-saml.svg?branch=master)](https://travis-ci.org/RobotsAndPencils/go-saml)
-
 A just good enough SAML client library written in Go. This library is by no means complete and has been developed
 to solve several specific integration efforts. However, it's a start, and it would be great to see
 it evolve into a more fleshed out implemention.
@@ -11,7 +9,7 @@ Inspired by the early work of [Matt Baird](https://github.com/mattbaird/gosaml).
 
 The library supports:
 
-* generating signed/unsigned AuthnRequests
+* generating signed AuthnRequests
 * validating signed AuthnRequests
 * generating service provider metadata
 * generating signed Responses
@@ -42,7 +40,9 @@ sp := saml.ServiceProviderSettings{
   IDPSSOURL:                   "http://idp/saml2",
   IDPSSODescriptorURL:         "http://idp/issuer",
   IDPPublicCertPath:           "idpcert.crt",
-  SPSignRequest:               "true",
+  Id:                          "entityID", // can be SP hostname without slash
+  SPSignRequest:               true,
+  IDPSignResponse:             true,
   AssertionConsumerServiceURL: "http://localhost:8000/saml_consume",
 }
 sp.Init()
@@ -105,6 +105,18 @@ response = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     httpcommon.SendBadRequest(w, "SAML attribute identifier uid missing")
     return
   }
+
+  //If is a encrypted response need decode
+  if response.IsEncrypted(){
+    err = response.Decrypt(sp.PrivateKeyPath)
+    if err != nil {
+      httpcommon.SendBadRequest(w, "SAMLResponse parse: "+err.Error())
+      return
+    }
+  }
+  // Print plain xml
+  //fmt.Printf(response.String())
+
 
   //...
 }
