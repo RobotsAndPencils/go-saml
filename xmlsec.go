@@ -27,6 +27,24 @@ func SignResponse(xml string, privateKeyPath string) (string, error) {
 	return sign(xml, privateKeyPath, xmlResponseID)
 }
 
+// DecryptResponse decrypt a SAML 2.0 xml using his private key
+func DecryptResponse(xml string, privateKeyPath string) (string, error) {
+	return decrypt(xml, privateKeyPath)
+}
+
+func decrypt(xml string, privateKeyPath string) (string, error) {
+
+	tempfile, err := ioutil.TempFile(os.TempDir(), "saml-resp")
+	ioutil.WriteFile(tempfile.Name(), []byte(xml), 0644)
+	plainXML, err := exec.Command("xmlsec1", "--decrypt", "--privkey-pem", privateKeyPath, tempfile.Name()).CombinedOutput()
+	defer deleteTempFile(tempfile.Name())
+	if err != nil {
+		return "", errors.New(err.Error() + " : " + string(plainXML))
+	}
+
+	return strings.Trim(string(plainXML), "\n"), nil
+}
+
 func sign(xml string, privateKeyPath string, id string) (string, error) {
 
 	samlXmlsecInput, err := ioutil.TempFile(os.TempDir(), "tmpgs")
