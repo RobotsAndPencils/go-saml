@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"errors"
-	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/diego-araujo/go-saml/util"
 	"time"
 )
 
