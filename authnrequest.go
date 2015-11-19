@@ -128,7 +128,7 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 			},
 			Url:  "", // caller must populate ar.AppSettings.Issuer
 		},
-		IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
+		IssueInstant: time.Now().UTC().Format(time.RFC3339),
 		NameIDPolicy: NameIDPolicy{
 			XMLName: xml.Name{
 				Local: "samlp:NameIDPolicy",
