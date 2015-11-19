@@ -9,11 +9,11 @@ type AuthnRequest struct {
 	SAMLSIG                        string                `xml:"xmlns:samlsig,attr,omitempty"`
 	ID                             string                `xml:"ID,attr"`
 	Version                        string                `xml:"Version,attr"`
-	ProtocolBinding                string                `xml:"ProtocolBinding,attr"`
+	ProtocolBinding                string                `xml:"ProtocolBinding,attr,omitempty"`
 	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
 	IssueInstant                   string                `xml:"IssueInstant,attr"`
-	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr"`
-	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr"`
+	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
+	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
 	Issuer                         Issuer                `xml:"Issuer"`
 	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
 	RequestedAuthnContext          RequestedAuthnContext `xml:"RequestedAuthnContext"`
