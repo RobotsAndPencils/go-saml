@@ -82,10 +82,12 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 
 // GetSignedAuthnRequest returns a singed XML document that represents a AuthnRequest SAML document
 func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
-	r := NewAuthnRequest()
+	r := NewAuthnRequestCustom(s.SPSignRequest)
 	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
 	r.Issuer.Url = s.IDPSSODescriptorURL
-	r.Signature.KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
+	if s.SPSignRequest {
+		r.Signature[0].KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
+	}
 
 	return r
 }
@@ -105,14 +107,17 @@ func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, er
 }
 
 func NewAuthnRequest() *AuthnRequest {
+	return NewAuthnRequestCustom(true)
+}
+
+func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 	id := util.ID()
-	return &AuthnRequest{
+	authReq := &AuthnRequest{
 		XMLName: xml.Name{
 			Local: "samlp:AuthnRequest",
 		},
 		SAMLP:                       "urn:oasis:names:tc:SAML:2.0:protocol",
 		SAML:                        "urn:oasis:names:tc:SAML:2.0:assertion",
-		SAMLSIG:                     "http://www.w3.org/2000/09/xmldsig#",
 		ID:                          id,
 		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
 		Version:                     "2.0",
@@ -146,7 +151,12 @@ func NewAuthnRequest() *AuthnRequest {
 				Transport: "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
 			},
 		},
-		Signature: Signature{
+	}
+
+	if sign {
+		authReq.SAMLSIG = "http://www.w3.org/2000/09/xmldsig#"
+		authReq.Signature = make([]Signature, 1, 1)
+		authReq.Signature[0] = Signature{
 			XMLName: xml.Name{
 				Local: "samlsig:Signature",
 			},
@@ -217,8 +227,9 @@ func NewAuthnRequest() *AuthnRequest {
 					},
 				},
 			},
-		},
+		}
 	}
+	return authReq
 }
 
 func (r *AuthnRequest) String() (string, error) {
