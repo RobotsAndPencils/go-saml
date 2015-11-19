@@ -23,7 +23,7 @@ type AuthnRequest struct {
 
 type Issuer struct {
 	XMLName xml.Name
-	SAML    string `xml:"xmlns:saml,attr"`
+	SAML    string `xml:"xmlns:saml,attr,omitempty"`
 	Url     string `xml:",innerxml"`
 }
 
@@ -35,14 +35,14 @@ type NameIDPolicy struct {
 
 type RequestedAuthnContext struct {
 	XMLName              xml.Name
-	SAMLP                string               `xml:"xmlns:samlp,attr"`
+	SAMLP                string               `xml:"xmlns:samlp,attr,omitempty"`
 	Comparison           string               `xml:"Comparison,attr"`
 	AuthnContextClassRef AuthnContextClassRef `xml:"AuthnContextClassRef"`
 }
 
 type AuthnContextClassRef struct {
 	XMLName   xml.Name
-	SAML      string `xml:"xmlns:saml,attr"`
+	SAML      string `xml:"xmlns:saml,attr,omitempty"`
 	Transport string `xml:",innerxml"`
 }
 

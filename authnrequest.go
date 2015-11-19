@@ -127,7 +127,6 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 				Local: "saml:Issuer",
 			},
 			Url:  "", // caller must populate ar.AppSettings.Issuer
-			SAML: "urn:oasis:names:tc:SAML:2.0:assertion",
 		},
 		IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
 		NameIDPolicy: NameIDPolicy{
@@ -141,13 +140,11 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 			XMLName: xml.Name{
 				Local: "samlp:RequestedAuthnContext",
 			},
-			SAMLP:      "urn:oasis:names:tc:SAML:2.0:protocol",
 			Comparison: "exact",
 			AuthnContextClassRef: AuthnContextClassRef{
 				XMLName: xml.Name{
 					Local: "saml:AuthnContextClassRef",
 				},
-				SAML:      "urn:oasis:names:tc:SAML:2.0:assertion",
 				Transport: "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
 			},
 		},
