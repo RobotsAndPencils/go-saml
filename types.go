@@ -14,6 +14,7 @@ type AuthnRequest struct {
 	IssueInstant                   string                `xml:"IssueInstant,attr"`
 	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
 	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
+	ForceAuthn                     string                `xml:"ForceAuthn,attr,omitempty"`
 	Issuer                         Issuer                `xml:"Issuer"`
 	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
 	RequestedAuthnContext          RequestedAuthnContext `xml:"RequestedAuthnContext"`
