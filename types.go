@@ -206,6 +206,11 @@ type Assertion struct {
 	Subject            Subject
 	Conditions         Conditions
 	AttributeStatement AttributeStatement
+	AuthnStatement     AuthnStatement
+}
+
+type AuthnStatement struct {
+	SessionIndex       string `xml:"SessionIndex,attr"`
 }
 
 type Conditions struct {
