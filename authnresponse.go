@@ -42,7 +42,6 @@ func ParseEncodedResponse(b64ResponseXML string) (*Response, error) {
 	// There is a bug with XML namespaces in Go that's causing XML attributes with colons to not be roundtrip
 	// marshal and unmarshaled so we'll keep the original string around for validation.
 	response.originalString = string(bytesXML)
-	//fmt.Println(response.originalString)
 	return &response, nil
 }
 
@@ -58,7 +57,7 @@ func (r *Response) IsEncrypted() bool {
 
 func (r *Response) Decrypt(privateKeyPath string) error{
 	s := r.originalString
-
+	
 	if r.IsEncrypted() == false {
 		return errors.New("missing EncryptedAssertion tag on SAML Response, is encrypted?")
 
@@ -67,14 +66,13 @@ func (r *Response) Decrypt(privateKeyPath string) error{
 	if err != nil {
 		return err
 	}
-	err = xml.Unmarshal([]byte(plainXML), &r)
+	err  = xml.Unmarshal([]byte(plainXML), &r)
 	if err != nil {
 		return err
 	}
-
+	
+	r.originalString = plainXML
 	return nil
-
-	//return DecryptResponse(s, privateKeyPath)
 }
 
 func (r *Response) Validate(s *ServiceProviderSettings) error {
@@ -86,24 +84,32 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("missing ID attribute on SAML Response")
 	}
 
-	if len(r.Assertion.ID) == 0 {
-		return errors.New("no Assertions")
+	assertion := Assertion{}
+	if r.IsEncrypted() {
+		assertion = r.EncryptedAssertion.Assertion
+	} else {
+		assertion = r.Assertion
+	}
+		
+
+	if len(assertion.ID) == 0 {
+        	        return errors.New("no Assertions")
 	}
 
-	if len(r.Signature.SignatureValue.Value) == 0 {
+	if len(assertion.Signature.SignatureValue.Value) == 0 {
 		return errors.New("no signature")
+	}
+
+	if assertion.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
+        	return errors.New("assertion method exception")
+        }
+
+        if assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
+        	return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
 	if r.Destination != s.AssertionConsumerServiceURL {
 		return errors.New("destination mismath expected: " + s.AssertionConsumerServiceURL + " not " + r.Destination)
-	}
-
-	if r.Assertion.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
-		return errors.New("assertion method exception")
-	}
-
-	if r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
-		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
 	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
@@ -112,7 +118,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 	}
 
 	//CHECK TIMES
-	expires := r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
+	expires := assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
 	notOnOrAfter, e := time.Parse(time.RFC3339, expires)
 	if e != nil {
 		return e
@@ -306,6 +312,10 @@ func (r *Response) String() (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func (r *Response) OriginalString() (string) {
+	return r.originalString
 }
 
 func (r *Response) SignedString(privateKeyPath string) (string, error) {

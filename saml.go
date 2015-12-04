@@ -2,6 +2,7 @@ package saml
 
 import "github.com/diego-araujo/go-saml/util"
 import stderrors "errors"
+
 // ServiceProviderSettings provides settings to configure server acting as a SAML Service Provider.
 // Expect only one IDP per SP in this configuration. If you need to configure multipe IDPs for an SP
 // then configure multiple instances of this module
@@ -10,11 +11,13 @@ type ServiceProviderSettings struct {
 	PrivateKeyPath              string
 	IDPSSOURL                   string
 	IDPSSODescriptorURL         string
+	DisplayName                 string
+	Description                 string
 	IDPPublicCertPath           string
 	AssertionConsumerServiceURL string
 	Id                          string
-  	SPSignRequest               bool
-	IDPSignResponse				bool
+	SPSignRequest               bool
+	IDPSignResponse             bool
 	hasInit                     bool
 	publicCert                  string
 	privateKey                  string
@@ -22,8 +25,8 @@ type ServiceProviderSettings struct {
 }
 
 var (
-	ErrPrivkey = stderrors.New("error load private key")
-	ErrSpPubCert = stderrors.New("error load SP publicCert")
+	ErrPrivkey    = stderrors.New("error load private key")
+	ErrSpPubCert  = stderrors.New("error load SP publicCert")
 	ErrIdpPubCert = stderrors.New("error load IDP publicCert")
 )
 
