@@ -76,7 +76,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+	err := r.VerifySignature(s.IDPPublicCertPath)
 	if err != nil {
 		return err
 	}
@@ -92,6 +92,34 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 	}
 
 	return nil
+}
+
+func (r *Response) FindSignatureTagName() (string, error) {
+	sigRef := r.Signature.SignedInfo.SamlsigReference.URI
+	if len(sigRef) == 0 {
+		sigRef = r.Assertion.Signature.SignedInfo.SamlsigReference.URI
+		if len(sigRef) == 0 {
+			return "", errors.New("No signature found in a supported location")
+		}
+	}
+	if sigRef[0] != '#' {
+		return "", errors.New("Weird Signature Reference URI: " + sigRef)
+	}
+	if r.ID == sigRef[1:] {
+		return "Response", nil
+	}
+	if r.Assertion.ID == sigRef[1:] {
+		return "Assertion", nil
+	}
+	return "", errors.New("could not resolve signature reference URI: " + sigRef)
+}
+
+func (r *Response) VerifySignature(IDPPublicCertPath string) error {
+	sigTagName, err := r.FindSignatureTagName()
+	if err != nil {
+		return err
+	}
+	return VerifyResponseSignature(r.originalString, IDPPublicCertPath, sigTagName)
 }
 
 func NewSignedResponse() *Response {

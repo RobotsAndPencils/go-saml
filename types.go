@@ -57,9 +57,9 @@ type Signature struct {
 
 type SignedInfo struct {
 	XMLName                xml.Name
-	CanonicalizationMethod CanonicalizationMethod
-	SignatureMethod        SignatureMethod
-	SamlsigReference       SamlsigReference
+	CanonicalizationMethod CanonicalizationMethod `xml:"CanonicalizationMethod"`
+	SignatureMethod        SignatureMethod    `xml:"SignatureMethod"`
+	SamlsigReference       SamlsigReference   `xml:"Reference"`
 }
 
 type SignatureValue struct {
@@ -204,6 +204,7 @@ type Assertion struct {
 	SAML               string `xml:"saml,attr"`
 	IssueInstant       string `xml:"IssueInstant,attr"`
 	Issuer             Issuer `xml:"Issuer"`
+	Signature Signature `xml:"Signature"`
 	Subject            Subject
 	Conditions         Conditions
 	AttributeStatement AttributeStatement
