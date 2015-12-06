@@ -29,20 +29,21 @@ func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
 }
 
 func ParseEncodedResponse(b64ResponseXML string) (*Response, error) {
-	response := Response{}
 	bytesXML, err := base64.StdEncoding.DecodeString(b64ResponseXML)
 	if err != nil {
 		return nil, err
 	}
-	err = xml.Unmarshal(bytesXML, &response)
+	return ParseDecodedResponse(bytesXML)
+}
+
+func ParseDecodedResponse(responseXML []byte) (*Response, error) {
+	response := Response{}
+	err := xml.Unmarshal(responseXML, &response)
 	if err != nil {
 		return nil, err
 	}
-
-	// There is a bug with XML namespaces in Go that's causing XML attributes with colons to not be roundtrip
-	// marshal and unmarshaled so we'll keep the original string around for validation.
-	response.originalString = string(bytesXML)
-	// fmt.Println(response.originalString)
+	// save the original response because XML Signatures are fussy
+	response.originalString = string(responseXML)
 	return &response, nil
 }
 
