@@ -41,6 +41,8 @@ sp := saml.ServiceProviderSettings{
   IDPSSODescriptorURL:         "http://idp/issuer",
   IDPPublicCertPath:           "idpcert.crt",
   Id:                          "entityID", // can be SP hostname without slash
+  DisplayName: "name", //maybe it will be displayed in IDP login page
+  Description: "desc" //maybe it will be displayed in IDP login page
   SPSignRequest:               true,
   IDPSignResponse:             true,
   AssertionConsumerServiceURL: "http://localhost:8000/saml_consume",
