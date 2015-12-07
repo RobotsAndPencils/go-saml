@@ -49,7 +49,7 @@ type AuthnContextClassRef struct {
 
 type Signature struct {
 	XMLName        xml.Name
-	Id             string `xml:"ID,attr"`
+	Id             string `xml:"Id,attr"`
 	SignedInfo     SignedInfo
 	SignatureValue SignatureValue
 	KeyInfo        KeyInfo
