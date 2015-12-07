@@ -16,9 +16,9 @@ type AuthnRequest struct {
 	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
 	ForceAuthn                     string                `xml:"ForceAuthn,attr,omitempty"`
 	Issuer                         Issuer                `xml:"Issuer"`
+	Signature                      []Signature             `xml:"Signature,omitempty"`
 	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
 	RequestedAuthnContext          RequestedAuthnContext `xml:"RequestedAuthnContext"`
-	Signature                      []Signature             `xml:"Signature,omitempty"`
 	originalString                 string
 }
 
@@ -49,7 +49,7 @@ type AuthnContextClassRef struct {
 
 type Signature struct {
 	XMLName        xml.Name
-	Id             string `xml:"Id,attr"`
+	Id             string `xml:"ID,attr"`
 	SignedInfo     SignedInfo
 	SignatureValue SignatureValue
 	KeyInfo        KeyInfo
