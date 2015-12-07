@@ -230,7 +230,7 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 }
 
 func (r *AuthnRequest) String() (string, error) {
-	b, err := xml.MarshalIndent(r, "", "    ")
+	b, err := xml.Marshal(r)
 	if err != nil {
 		return "", err
 	}
