@@ -172,7 +172,7 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 					XMLName: xml.Name{
 						Local: "samlsig:SignatureMethod",
 					},
-					Algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+					Algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
 				},
 				SamlsigReference: SamlsigReference{
 					XMLName: xml.Name{
@@ -183,18 +183,26 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 						XMLName: xml.Name{
 							Local: "samlsig:Transforms",
 						},
-						Transform: Transform{
-							XMLName: xml.Name{
-								Local: "samlsig:Transform",
+						Transforms: []Transform{
+							{
+								XMLName: xml.Name{
+									Local: "samlsig:Transform",
+								},
+								Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 							},
-							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+							{
+								XMLName: xml.Name{
+									Local: "samlsig:Transform",
+								},
+								Algorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
+							},
 						},
 					},
 					DigestMethod: DigestMethod{
 						XMLName: xml.Name{
 							Local: "samlsig:DigestMethod",
 						},
-						Algorithm: "http://www.w3.org/2000/09/xmldsig#sha1",
+						Algorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
 					},
 					DigestValue: DigestValue{
 						XMLName: xml.Name{

@@ -97,7 +97,7 @@ type X509Data struct {
 
 type Transforms struct {
 	XMLName   xml.Name
-	Transform Transform
+	Transforms []Transform
 }
 
 type DigestMethod struct {
