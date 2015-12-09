@@ -75,6 +75,41 @@ func (r *Response) Decrypt(privateKeyPath string) error{
 	return nil
 }
 
+func (r *Response) ValidateResponseSignature(s *ServiceProviderSettings) error {
+
+	assertion, err := r.getAssertion()
+        if err != nil {
+                return err
+        }
+
+	if len(assertion.Signature.SignatureValue.Value) == 0 {
+                return errors.New("no signature")
+        }
+
+	err = VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+        if err != nil {
+                return err
+        }
+
+	return nil
+}
+
+func (r *Response) getAssertion() (Assertion, error) {
+
+	assertion := Assertion{}
+
+        if r.IsEncrypted() {
+                assertion = r.EncryptedAssertion.Assertion
+        } else {
+        	assertion = r.Assertion
+        }   
+
+	if len(assertion.ID) == 0 {
+                        return assertion, errors.New("no Assertions")
+        }
+	return assertion, nil
+}
+
 func (r *Response) Validate(s *ServiceProviderSettings) error {
 	if r.Version != "2.0" {
 		return errors.New("unsupported SAML Version")
@@ -84,20 +119,10 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("missing ID attribute on SAML Response")
 	}
 
-	assertion := Assertion{}
-	if r.IsEncrypted() {
-		assertion = r.EncryptedAssertion.Assertion
-	} else {
-		assertion = r.Assertion
-	}
-		
-
-	if len(assertion.ID) == 0 {
-        	        return errors.New("no Assertions")
-	}
-
-	if len(assertion.Signature.SignatureValue.Value) == 0 {
-		return errors.New("no signature")
+	
+	assertion, err := r.getAssertion()
+	if err != nil {
+		return err
 	}
 
 	if assertion.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
@@ -112,24 +137,29 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("destination mismath expected: " + s.AssertionConsumerServiceURL + " not " + r.Destination)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
-	if err != nil {
-		return err
-	}
-
-	//CHECK TIMES
-	expires := assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
-	notOnOrAfter, e := time.Parse(time.RFC3339, expires)
-	if e != nil {
-		return e
-	}
-	if notOnOrAfter.Before(time.Now()) {
-		return errors.New("assertion has expired on: " + expires)
-	}
-
 	return nil
 }
 
+
+func (r *Response) ValidateExpiredConfirmation(s *ServiceProviderSettings) error {
+	
+	assertion, err := r.getAssertion()
+        if err != nil {
+                return err
+        }
+
+	//CHECK TIMES
+        expires := assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
+        notOnOrAfter, e := time.Parse(time.RFC3339, expires)
+        if e != nil {
+                return e
+        }
+        if notOnOrAfter.Before(time.Now()) {
+                return errors.New("assertion has expired on: " + expires)
+        }
+
+	return nil	
+}
 func NewSignedResponse() *Response {
 	return &Response{
 		XMLName: xml.Name{
