@@ -87,6 +87,7 @@ func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 	r.Issuer.Url = s.IDPSSODescriptorURL
 	if s.SPSignRequest {
 		r.Signature[0].KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
+		r.Destination = s.IDPSSOURL
 	}
 
 	return r

@@ -12,6 +12,7 @@ type AuthnRequest struct {
 	ProtocolBinding                string                `xml:"ProtocolBinding,attr,omitempty"`
 	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
 	IssueInstant                   string                `xml:"IssueInstant,attr"`
+	Destination                    string                `xml:"Destination,attr,omitempty"`
 	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
 	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
 	ForceAuthn                     string                `xml:"ForceAuthn,attr,omitempty"`
