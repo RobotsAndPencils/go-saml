@@ -18,8 +18,8 @@ type AuthnRequest struct {
 	ForceAuthn                     string                `xml:"ForceAuthn,attr,omitempty"`
 	Issuer                         Issuer                `xml:"Issuer"`
 	Signature                      []Signature             `xml:"Signature,omitempty"`
-	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
-	RequestedAuthnContext          RequestedAuthnContext `xml:"RequestedAuthnContext"`
+	NameIDPolicy                   *NameIDPolicy         `xml:"NameIDPolicy,omitempty"`
+	RequestedAuthnContext          *RequestedAuthnContext `xml:"RequestedAuthnContext,omitempty"`
 	originalString                 string
 }
 
@@ -31,7 +31,7 @@ type Issuer struct {
 
 type NameIDPolicy struct {
 	XMLName     xml.Name
-	AllowCreate bool   `xml:"AllowCreate,attr"`
+	AllowCreate bool   `xml:"AllowCreate,attr,omitempty"`
 	Format      string `xml:"Format,attr"`
 }
 

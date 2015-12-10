@@ -130,14 +130,14 @@ func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 			Url:  "", // caller must populate ar.AppSettings.Issuer
 		},
 		IssueInstant: time.Now().UTC().Format(time.RFC3339),
-		NameIDPolicy: NameIDPolicy{
+		NameIDPolicy: &NameIDPolicy{
 			XMLName: xml.Name{
 				Local: "samlp:NameIDPolicy",
 			},
 			AllowCreate: true,
 			Format:      "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
 		},
-		RequestedAuthnContext: RequestedAuthnContext{
+		RequestedAuthnContext: &RequestedAuthnContext{
 			XMLName: xml.Name{
 				Local: "samlp:RequestedAuthnContext",
 			},
