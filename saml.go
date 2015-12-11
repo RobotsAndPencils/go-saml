@@ -1,6 +1,10 @@
 package saml
 
-import "github.com/RobotsAndPencils/go-saml/util"
+import (
+	"errors"
+
+	"github.com/RobotsAndPencils/go-saml/util"
+)
 
 // ServiceProviderSettings provides settings to configure server acting as a SAML Service Provider.
 // Expect only one IDP per SP in this configuration. If you need to configure multipe IDPs for an SP
@@ -10,9 +14,10 @@ type ServiceProviderSettings struct {
 	PrivateKeyPath              string
 	IDPSSOURL                   string
 	IDPSSODescriptorURL         string
+	IDPPublicCertContent        string
 	IDPPublicCertPath           string
 	AssertionConsumerServiceURL string
-        SPSignRequest               bool
+	SPSignRequest               bool
 
 	hasInit       bool
 	publicCert    string
@@ -27,25 +32,31 @@ func (s *ServiceProviderSettings) Init() (err error) {
 	if s.hasInit {
 		return nil
 	}
-	s.hasInit = true
 
-        if s.SPSignRequest {
+	if s.SPSignRequest {
 		s.publicCert, err = util.LoadCertificate(s.PublicCertPath)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		s.privateKey, err = util.LoadCertificate(s.PrivateKeyPath)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	s.iDPPublicCert, err = util.LoadCertificate(s.IDPPublicCertPath)
-	if err != nil {
-		panic(err)
+	if s.IDPPublicCertPath != "" {
+		s.iDPPublicCert, err = util.LoadCertificate(s.IDPPublicCertPath)
+		if err != nil {
+			return err
+		}
+	} else if s.IDPPublicCertContent != "" {
+		s.iDPPublicCert = util.SanitizeCertificate(s.IDPPublicCertContent)
+	} else {
+		return errors.New("missing idp public cert or its path")
 	}
 
+	s.hasInit = true
 	return nil
 }
 
