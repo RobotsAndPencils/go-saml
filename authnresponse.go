@@ -55,9 +55,9 @@ func (r *Response) IsEncrypted() bool {
 	}
 }
 
-func (r *Response) Decrypt(privateKeyPath string) error{
+func (r *Response) Decrypt(privateKeyPath string) error {
 	s := r.originalString
-	
+
 	if r.IsEncrypted() == false {
 		return errors.New("missing EncryptedAssertion tag on SAML Response, is encrypted?")
 
@@ -66,11 +66,11 @@ func (r *Response) Decrypt(privateKeyPath string) error{
 	if err != nil {
 		return err
 	}
-	err  = xml.Unmarshal([]byte(plainXML), &r)
+	err = xml.Unmarshal([]byte(plainXML), &r)
 	if err != nil {
 		return err
 	}
-	
+
 	r.originalString = plainXML
 	return nil
 }
@@ -78,18 +78,18 @@ func (r *Response) Decrypt(privateKeyPath string) error{
 func (r *Response) ValidateResponseSignature(s *ServiceProviderSettings) error {
 
 	assertion, err := r.getAssertion()
-        if err != nil {
-                return err
-        }
+	if err != nil {
+		return err
+	}
 
 	if len(assertion.Signature.SignatureValue.Value) == 0 {
-                return errors.New("no signature")
-        }
+		return errors.New("no signature")
+	}
 
 	err = VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
-        if err != nil {
-                return err
-        }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -98,15 +98,15 @@ func (r *Response) getAssertion() (Assertion, error) {
 
 	assertion := Assertion{}
 
-        if r.IsEncrypted() {
-                assertion = r.EncryptedAssertion.Assertion
-        } else {
-        	assertion = r.Assertion
-        }   
+	if r.IsEncrypted() {
+		assertion = r.EncryptedAssertion.Assertion
+	} else {
+		assertion = r.Assertion
+	}
 
 	if len(assertion.ID) == 0 {
-                        return assertion, errors.New("no Assertions")
-        }
+		return assertion, errors.New("no Assertions")
+	}
 	return assertion, nil
 }
 
@@ -119,18 +119,17 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("missing ID attribute on SAML Response")
 	}
 
-	
 	assertion, err := r.getAssertion()
 	if err != nil {
 		return err
 	}
 
 	if assertion.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
-        	return errors.New("assertion method exception")
-        }
+		return errors.New("assertion method exception")
+	}
 
-        if assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
-        	return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
+	if assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
+		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
 	if r.Destination != s.AssertionConsumerServiceURL {
@@ -140,25 +139,24 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 	return nil
 }
 
-
 func (r *Response) ValidateExpiredConfirmation(s *ServiceProviderSettings) error {
-	
+
 	assertion, err := r.getAssertion()
-        if err != nil {
-                return err
-        }
+	if err != nil {
+		return err
+	}
 
 	//CHECK TIMES
-        expires := assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
-        notOnOrAfter, e := time.Parse(time.RFC3339, expires)
-        if e != nil {
-                return e
-        }
-        if notOnOrAfter.Before(time.Now()) {
-                return errors.New("assertion has expired on: " + expires)
-        }
+	expires := assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
+	notOnOrAfter, e := time.Parse(time.RFC3339, expires)
+	if e != nil {
+		return e
+	}
+	if notOnOrAfter.Before(time.Now()) {
+		return errors.New("assertion has expired on: " + expires)
+	}
 
-	return nil	
+	return nil
 }
 func NewSignedResponse() *Response {
 	return &Response{
@@ -344,7 +342,7 @@ func (r *Response) String() (string, error) {
 	return string(b), nil
 }
 
-func (r *Response) OriginalString() (string) {
+func (r *Response) OriginalString() string {
 	return r.originalString
 }
 

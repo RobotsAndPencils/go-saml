@@ -53,8 +53,7 @@ type Signature struct {
 	SignedInfo     SignedInfo
 	SignatureValue SignatureValue
 	KeyInfo        KeyInfo
-	DS     	       string `xml:"xmlns:dsig,attr"`
-
+	DS             string `xml:"xmlns:dsig,attr"`
 }
 
 type SignedInfo struct {
@@ -137,33 +136,32 @@ type EntityDescriptor struct {
 }
 
 type Extensions struct {
-	XMLName xml.Name
-	Alg     string `xml:"xmlns:alg,attr"`
-	MDAttr  string `xml:"xmlns:mdattr,attr"`
-	MDRPI   string `xml:"xmlns:mdrpi,attr"`
+	XMLName          xml.Name
+	Alg              string `xml:"xmlns:alg,attr"`
+	MDAttr           string `xml:"xmlns:mdattr,attr"`
+	MDRPI            string `xml:"xmlns:mdrpi,attr"`
 	EntityAttributes string `xml:"EntityAttributes,omitempty"`
-	UIInfo  UIInfo
+	UIInfo           UIInfo
 }
 
 type UIInfo struct {
-	XMLName xml.Name
-	DisplayName UIDisplayName 
-	MDUI	 string `xml:"xmlns:mdui,attr"`
+	XMLName     xml.Name
+	DisplayName UIDisplayName
+	MDUI        string `xml:"xmlns:mdui,attr"`
 	Description UIDescription
 }
 
 type UIDisplayName struct {
-        XMLName xml.Name `xml:"mdui:DisplayName"`
-        Lang      string  `xml:"xml:lang,attr,omitempty"` 
-	Value	 string   `xml:",innerxml"`
+	XMLName xml.Name `xml:"mdui:DisplayName"`
+	Lang    string   `xml:"xml:lang,attr,omitempty"`
+	Value   string   `xml:",innerxml"`
 }
 
 type UIDescription struct {
-        XMLName xml.Name `xml:"mdui:Description"`
-        Lang      string  `xml:"xml:lang,attr,omitempty"`  
-        Value    string   `xml:",innerxml"`
+	XMLName xml.Name `xml:"mdui:Description"`
+	Lang    string   `xml:"xml:lang,attr,omitempty"`
+	Value   string   `xml:",innerxml"`
 }
-
 
 type SPSSODescriptor struct {
 	XMLName                    xml.Name
@@ -174,7 +172,7 @@ type SPSSODescriptor struct {
 	EncryptionKeyDescriptor    KeyDescriptor
 	// SingleLogoutService        SingleLogoutService `xml:"SingleLogoutService"`
 	AssertionConsumerServices []AssertionConsumerService
-	Extensions      Extensions      `xml:"Extensions"`
+	Extensions                Extensions `xml:"Extensions"`
 }
 
 type EntityAttributes struct {
@@ -203,7 +201,7 @@ type AssertionConsumerService struct {
 	Binding  string `xml:"Binding,attr"`
 	Location string `xml:"Location,attr"`
 	Index    string `xml:"index,attr"`
-	Default  bool `xml:"isDefault,attr,omitempty"`
+	Default  bool   `xml:"isDefault,attr,omitempty"`
 }
 
 type Response struct {
@@ -221,8 +219,8 @@ type Response struct {
 	Assertion          Assertion          `xml:"Assertion,omitempty"`
 	Issuer             Issuer             `xml:"Issuer"`
 	Status             Status             `xml:"Status"`
-  	Signature          Signature         `xml:"Signature"` 
-	originalString string
+	Signature          Signature          `xml:"Signature"`
+	originalString     string
 }
 
 type EncryptedAssertion struct {
@@ -269,10 +267,8 @@ type Assertion struct {
 	Subject            Subject
 	Conditions         Conditions
 	AttributeStatement AttributeStatement
-  	Signature          Signature
-
+	Signature          Signature
 }
-
 
 type Conditions struct {
 	XMLName      xml.Name
