@@ -84,7 +84,9 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 	r := NewAuthnRequest()
 	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
-	r.Issuer.Url = s.IDPSSODescriptorURL
+	r.Destination = s.IDPSSOURL
+	//r.Issuer.Url = s.IDPSSODescriptorURL
+	r.Issuer.Url = s.Id
 	r.Signature.KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
 
 	return r
@@ -116,6 +118,7 @@ func NewAuthnRequest() *AuthnRequest {
 		ID:                          id,
 		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
 		Version:                     "2.0",
+		Destination:                 "", // caller must populate ar.AppSettings.Destination,
 		AssertionConsumerServiceURL: "", // caller must populate ar.AppSettings.AssertionConsumerServiceURL,
 		Issuer: Issuer{
 			XMLName: xml.Name{

@@ -8,6 +8,7 @@ type AuthnRequest struct {
 	SAML                           string                `xml:"xmlns:saml,attr"`
 	SAMLSIG                        string                `xml:"xmlns:samlsig,attr"`
 	ID                             string                `xml:"ID,attr"`
+	Destination                    string                `xml:"Destination,attr"`
 	Version                        string                `xml:"Version,attr"`
 	ProtocolBinding                string                `xml:"ProtocolBinding,attr"`
 	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
@@ -23,7 +24,7 @@ type AuthnRequest struct {
 
 type Issuer struct {
 	XMLName xml.Name
-	SAML    string `xml:"xmlns:saml,attr"`
+	SAML    string `xml:"xmlns:saml2,attr"`
 	Url     string `xml:",innerxml"`
 }
 
@@ -52,6 +53,7 @@ type Signature struct {
 	SignedInfo     SignedInfo
 	SignatureValue SignatureValue
 	KeyInfo        KeyInfo
+	DS             string `xml:"xmlns:dsig,attr"`
 }
 
 type SignedInfo struct {
@@ -68,9 +70,13 @@ type SignatureValue struct {
 
 type KeyInfo struct {
 	XMLName  xml.Name
-	X509Data X509Data `xml:",innerxml"`
+	X509Data X509Data
 }
 
+type KeyInfoMain struct {
+	XMLName      xml.Name     `xml:"KeyInfo"`
+	EncryptedKey EncryptedKey `xml:"EncryptedKey,omitempty"`
+}
 type CanonicalizationMethod struct {
 	XMLName   xml.Name
 	Algorithm string `xml:"Algorithm,attr"`
@@ -91,7 +97,7 @@ type SamlsigReference struct {
 
 type X509Data struct {
 	XMLName         xml.Name
-	X509Certificate X509Certificate `xml:",innerxml"`
+	X509Certificate X509Certificate
 }
 
 type Transforms struct {
@@ -130,21 +136,43 @@ type EntityDescriptor struct {
 }
 
 type Extensions struct {
-	XMLName xml.Name
-	Alg     string `xml:"xmlns:alg,attr"`
-	MDAttr  string `xml:"xmlns:mdattr,attr"`
-	MDRPI   string `xml:"xmlns:mdrpi,attr"`
+	XMLName          xml.Name
+	Alg              string `xml:"xmlns:alg,attr"`
+	MDAttr           string `xml:"xmlns:mdattr,attr"`
+	MDRPI            string `xml:"xmlns:mdrpi,attr"`
+	EntityAttributes string `xml:"EntityAttributes,omitempty"`
+	UIInfo           UIInfo
+}
 
-	EntityAttributes string `xml:"EntityAttributes"`
+type UIInfo struct {
+	XMLName     xml.Name
+	DisplayName UIDisplayName
+	MDUI        string `xml:"xmlns:mdui,attr"`
+	Description UIDescription
+}
+
+type UIDisplayName struct {
+	XMLName xml.Name `xml:"mdui:DisplayName"`
+	Lang    string   `xml:"xml:lang,attr,omitempty"`
+	Value   string   `xml:",innerxml"`
+}
+
+type UIDescription struct {
+	XMLName xml.Name `xml:"mdui:Description"`
+	Lang    string   `xml:"xml:lang,attr,omitempty"`
+	Value   string   `xml:",innerxml"`
 }
 
 type SPSSODescriptor struct {
 	XMLName                    xml.Name
 	ProtocolSupportEnumeration string `xml:"protocolSupportEnumeration,attr"`
+	AuthnRequestsSigned        string `xml:"AuthnRequestsSigned,attr"`
+	WantAssertionsSigned       string `xml:"WantAssertionsSigned,attr"`
 	SigningKeyDescriptor       KeyDescriptor
 	EncryptionKeyDescriptor    KeyDescriptor
 	// SingleLogoutService        SingleLogoutService `xml:"SingleLogoutService"`
 	AssertionConsumerServices []AssertionConsumerService
+	Extensions                Extensions `xml:"Extensions"`
 }
 
 type EntityAttributes struct {
@@ -173,11 +201,12 @@ type AssertionConsumerService struct {
 	Binding  string `xml:"Binding,attr"`
 	Location string `xml:"Location,attr"`
 	Index    string `xml:"index,attr"`
+	Default  bool   `xml:"isDefault,attr,omitempty"`
 }
 
 type Response struct {
 	XMLName      xml.Name
-	SAMLP        string `xml:"xmlns:samlp,attr"`
+	SAMLP        string `xml:"xmlns:saml2p,attr"`
 	SAML         string `xml:"xmlns:saml,attr"`
 	SAMLSIG      string `xml:"xmlns:samlsig,attr"`
 	Destination  string `xml:"Destination,attr"`
@@ -186,12 +215,44 @@ type Response struct {
 	IssueInstant string `xml:"IssueInstant,attr"`
 	InResponseTo string `xml:"InResponseTo,attr"`
 
-	Assertion Assertion `xml:"Assertion"`
-	Signature Signature `xml:"Signature"`
-	Issuer    Issuer    `xml:"Issuer"`
-	Status    Status    `xml:"Status"`
+	EncryptedAssertion EncryptedAssertion `xml:"EncryptedAssertion,omitempty"`
+	Assertion          Assertion          `xml:"Assertion,omitempty"`
+	Issuer             Issuer             `xml:"Issuer"`
+	Status             Status             `xml:"Status"`
+	Signature          Signature          `xml:"Signature"`
+	originalString     string
+}
 
-	originalString string
+type EncryptedAssertion struct {
+	XMLName       xml.Name
+	EncryptedData EncryptedData
+	Assertion     Assertion `xml:"Assertion"`
+}
+
+type EncryptedData struct {
+	XMLName          xml.Name
+	EncryptionMethod EncryptionMethod
+	KeyInfo          KeyInfoMain `xml:"KeyInfo"`
+	CipherData       CipherData
+}
+
+type EncryptionMethod struct {
+	XMLName      xml.Name
+	Algorithm    string `xml:"Algorithm,attr"`
+	DigestMethod DigestMethod
+}
+
+type EncryptedKey struct {
+	XMLName          xml.Name
+	ID               string `xml:"Id,attr"`
+	EncryptionMethod EncryptionMethod
+	KeyInfo          KeyInfo
+	CipherData       CipherData
+}
+
+type CipherData struct {
+	XMLName     xml.Name
+	CipherValue string `xml:"CipherValue"`
 }
 
 type Assertion struct {
@@ -206,6 +267,7 @@ type Assertion struct {
 	Subject            Subject
 	Conditions         Conditions
 	AttributeStatement AttributeStatement
+	Signature          Signature
 }
 
 type Conditions struct {
