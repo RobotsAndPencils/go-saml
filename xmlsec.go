@@ -116,7 +116,7 @@ func Decrypt(xml string, privateKeyPath string) ([]byte, error) {
 
 	args := []string{"--decrypt", "--privkey-pem", privateKeyPath,
 		"--output", samlXmlsecOutput.Name(), samlXmlsecInput.Name()}
-	fmt.Println("running:", "xmlsec1", args)
+	// fmt.Println("running:", "xmlsec1", args)
 	output, err := exec.Command("xmlsec1", args...).CombinedOutput()
 	if err != nil {
 		return nil, errors.New("error decrypting document: " + err.Error() + "; " + string(output))
