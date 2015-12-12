@@ -98,6 +98,9 @@ func (r *Response) FindSignatureTagName() (string, error) {
 	sigRef := r.Signature.SignedInfo.SamlsigReference.URI
 	if len(sigRef) == 0 {
 		sigRef = r.Assertion.Signature.SignedInfo.SamlsigReference.URI
+		if len(sigRef) == 0 && r.EncryptedAssertion.Assertion != nil {
+			sigRef = r.EncryptedAssertion.Assertion.Signature.SignedInfo.SamlsigReference.URI
+		}
 		if len(sigRef) == 0 {
 			return "", errors.New("No signature found in a supported location")
 		}
@@ -111,7 +114,22 @@ func (r *Response) FindSignatureTagName() (string, error) {
 	if r.Assertion.ID == sigRef[1:] {
 		return "Assertion", nil
 	}
+	if r.EncryptedAssertion.Assertion != nil && r.EncryptedAssertion.Assertion.ID == sigRef[1:] {
+		// this ambiguity makes xmlsec1 CLI not terribly useful...
+		return "Assertion", nil
+	}
 	return "", errors.New("could not resolve signature reference URI: " + sigRef)
+}
+
+func (r *Response) Decrypt(SPPrivateCertPath string) (*Response, error) {
+	decrypted_xml, err := Decrypt(r.originalString, SPPrivateCertPath)
+	if err != nil {
+		return nil, err
+	}
+	authnResponse := &Response{}
+	err = xml.Unmarshal(decrypted_xml, &authnResponse)
+	authnResponse.originalString = string(decrypted_xml)
+	return authnResponse, err
 }
 
 func (r *Response) VerifySignature(IDPPublicCertPath string) error {

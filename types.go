@@ -189,11 +189,25 @@ type Response struct {
 	InResponseTo string `xml:"InResponseTo,attr"`
 
 	Assertion Assertion `xml:"Assertion"`
+	EncryptedAssertion EncryptedAssertion `xml:"EncryptedAssertion"`
 	Signature Signature `xml:"Signature"`
 	Issuer    Issuer    `xml:"Issuer"`
 	Status    Status    `xml:"Status"`
-
 	originalString string
+}
+
+type EncryptedData struct {
+	XMLName xml.Name
+	Type    string   `xml:"Type,attr"`
+}
+
+type EncryptedAssertion struct {
+	XMLName       xml.Name
+	EncryptedData *EncryptedData `xml:"EncryptedData"`
+
+	// "Assertion" nodes are not valid here according to the SAML assertion schema, but they are implied by the
+	// XMLEnc standard as an intermediate form, and therefore in the files that 'xmlsec1 --decrypt' returns.
+	Assertion     *Assertion     `xml:"Assertion"`
 }
 
 type Assertion struct {

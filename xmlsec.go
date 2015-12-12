@@ -99,6 +99,31 @@ func verify(xml string, publicCertPath string, id string) error {
 	return nil
 }
 
+func Decrypt(xml string, privateKeyPath string) ([]byte, error) {
+	samlXmlsecInput, err := ioutil.TempFile(os.TempDir(), "tmpes")
+	if err != nil {
+		return nil, err
+	}
+	samlXmlsecInput.WriteString(xml)
+	samlXmlsecInput.Close()
+	defer deleteTempFile(samlXmlsecInput.Name())
+
+	samlXmlsecOutput, err := ioutil.TempFile(os.TempDir(), "tmpds")
+	if err != nil {
+		return nil, err
+	}
+	defer deleteTempFile(samlXmlsecOutput.Name())
+
+	args := []string{"--decrypt", "--privkey-pem", privateKeyPath,
+		"--output", samlXmlsecOutput.Name(), samlXmlsecInput.Name()}
+	fmt.Println("running:", "xmlsec1", args)
+	output, err := exec.Command("xmlsec1", args...).CombinedOutput()
+	if err != nil {
+		return nil, errors.New("error decrypting document: " + err.Error() + "; " + string(output))
+	}
+	return ioutil.ReadAll(samlXmlsecOutput)
+}
+
 // deleteTempFile remove a file and ignore error
 // Intended to be called in a defer after the creation of a temp file to ensure cleanup
 func deleteTempFile(filename string) {
