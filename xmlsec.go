@@ -11,6 +11,7 @@ import (
 const (
 	xmlResponseID = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
 	xmlRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+	xmlLogoutRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:LogoutRequest"
 )
 
 // SignRequest sign a SAML 2.0 AuthnRequest
@@ -18,6 +19,10 @@ const (
 // through `exec`
 func SignRequest(xml string, privateKeyPath string) (string, error) {
 	return sign(xml, privateKeyPath, xmlRequestID)
+}
+
+func SignLogoutRequest(xml string, privateKeyPath string) (string, error) {
+	return sign(xml, privateKeyPath, xmlLogoutRequestID)
 }
 
 // SignResponse sign a SAML 2.0 Response

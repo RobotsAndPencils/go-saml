@@ -9,6 +9,7 @@ type ServiceProviderSettings struct {
 	PublicCertPath              string
 	PrivateKeyPath              string
 	IDPSSOURL                   string
+	IDPSSOLogoutURL             string
 	IDPSSODescriptorURL         string
 	IDPPublicCertPath           string
 	AssertionConsumerServiceURL string

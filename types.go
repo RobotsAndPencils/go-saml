@@ -261,7 +261,7 @@ type SubjectConfirmationData struct {
 
 type NameID struct {
 	XMLName xml.Name
-	Format  string `xml:",attr"`
+	Format  string `xml:",attr,omitempty"`
 	Value   string `xml:",innerxml"`
 }
 
@@ -287,4 +287,24 @@ type Attribute struct {
 type AttributeStatement struct {
 	XMLName    xml.Name
 	Attributes []Attribute `xml:"Attribute"`
+}
+
+type LogoutRequest struct {
+	XMLName      xml.Name
+	SAMLP        string         `xml:"xmlns:samlp,attr"`
+	SAML         string         `xml:"xmlns:saml,attr"`
+	SAMLSIG      string         `xml:"xmlns:samlsig,attr,omitempty"`
+	ID           string         `xml:"ID,attr"`
+	Version      string         `xml:"Version,attr"`
+	IssueInstant string         `xml:"IssueInstant,attr"`
+	Destination  string         `xml:"Destination,attr,omitempty"`
+	Issuer       Issuer         `xml:"Issuer"`
+	Signature    *Signature     `xml:"Signature,omitempty"`
+	NameID       NameID         `xml:"NameID"`
+	SessionIndex []SessionIndex `xml:"SessionIndex"`
+}
+
+type SessionIndex struct {
+	XMLName xml.Name
+	Value   string `xml:",innerxml"`
 }
