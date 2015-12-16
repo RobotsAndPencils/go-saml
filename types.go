@@ -4,21 +4,21 @@ import "encoding/xml"
 
 type AuthnRequest struct {
 	XMLName                        xml.Name
-	SAMLP                          string                `xml:"xmlns:samlp,attr"`
-	SAML                           string                `xml:"xmlns:saml,attr"`
-	SAMLSIG                        string                `xml:"xmlns:samlsig,attr,omitempty"`
-	ID                             string                `xml:"ID,attr"`
-	Version                        string                `xml:"Version,attr"`
-	ProtocolBinding                string                `xml:"ProtocolBinding,attr,omitempty"`
-	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
-	IssueInstant                   string                `xml:"IssueInstant,attr"`
-	Destination                    string                `xml:"Destination,attr,omitempty"`
-	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
-	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
-	ForceAuthn                     string                `xml:"ForceAuthn,attr,omitempty"`
-	Issuer                         Issuer                `xml:"Issuer"`
-	Signature                      []Signature             `xml:"Signature,omitempty"`
-	NameIDPolicy                   *NameIDPolicy         `xml:"NameIDPolicy,omitempty"`
+	SAMLP                          string                 `xml:"xmlns:samlp,attr"`
+	SAML                           string                 `xml:"xmlns:saml,attr"`
+	SAMLSIG                        string                 `xml:"xmlns:samlsig,attr,omitempty"`
+	ID                             string                 `xml:"ID,attr"`
+	Version                        string                 `xml:"Version,attr"`
+	ProtocolBinding                string                 `xml:"ProtocolBinding,attr,omitempty"`
+	AssertionConsumerServiceURL    string                 `xml:"AssertionConsumerServiceURL,attr"`
+	IssueInstant                   string                 `xml:"IssueInstant,attr"`
+	Destination                    string                 `xml:"Destination,attr,omitempty"`
+	AssertionConsumerServiceIndex  int                    `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
+	AttributeConsumingServiceIndex int                    `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
+	ForceAuthn                     string                 `xml:"ForceAuthn,attr,omitempty"`
+	Issuer                         Issuer                 `xml:"Issuer"`
+	Signature                      []Signature            `xml:"Signature,omitempty"`
+	NameIDPolicy                   *NameIDPolicy          `xml:"NameIDPolicy,omitempty"`
 	RequestedAuthnContext          *RequestedAuthnContext `xml:"RequestedAuthnContext,omitempty"`
 	originalString                 string
 }
@@ -59,8 +59,8 @@ type Signature struct {
 type SignedInfo struct {
 	XMLName                xml.Name
 	CanonicalizationMethod CanonicalizationMethod `xml:"CanonicalizationMethod"`
-	SignatureMethod        SignatureMethod    `xml:"SignatureMethod"`
-	SamlsigReference       SamlsigReference   `xml:"Reference"`
+	SignatureMethod        SignatureMethod        `xml:"SignatureMethod"`
+	SamlsigReference       SamlsigReference       `xml:"Reference"`
 }
 
 type SignatureValue struct {
@@ -97,7 +97,7 @@ type X509Data struct {
 }
 
 type Transforms struct {
-	XMLName   xml.Name
+	XMLName    xml.Name
 	Transforms []Transform
 }
 
@@ -188,17 +188,17 @@ type Response struct {
 	IssueInstant string `xml:"IssueInstant,attr"`
 	InResponseTo string `xml:"InResponseTo,attr"`
 
-	Assertion Assertion `xml:"Assertion"`
+	Assertion          Assertion          `xml:"Assertion"`
 	EncryptedAssertion EncryptedAssertion `xml:"EncryptedAssertion"`
-	Signature Signature `xml:"Signature"`
-	Issuer    Issuer    `xml:"Issuer"`
-	Status    Status    `xml:"Status"`
-	originalString string
+	Signature          Signature          `xml:"Signature"`
+	Issuer             Issuer             `xml:"Issuer"`
+	Status             Status             `xml:"Status"`
+	originalString     string
 }
 
 type EncryptedData struct {
 	XMLName xml.Name
-	Type    string   `xml:"Type,attr"`
+	Type    string `xml:"Type,attr"`
 }
 
 type EncryptedAssertion struct {
@@ -207,19 +207,19 @@ type EncryptedAssertion struct {
 
 	// "Assertion" nodes are not valid here according to the SAML assertion schema, but they are implied by the
 	// XMLEnc standard as an intermediate form, and therefore in the files that 'xmlsec1 --decrypt' returns.
-	Assertion     *Assertion     `xml:"Assertion"`
+	Assertion *Assertion `xml:"Assertion"`
 }
 
 type Assertion struct {
 	XMLName            xml.Name
-	ID                 string `xml:"ID,attr"`
-	Version            string `xml:"Version,attr"`
-	XS                 string `xml:"xmlns:xs,attr"`
-	XSI                string `xml:"xmlns:xsi,attr"`
-	SAML               string `xml:"saml,attr"`
-	IssueInstant       string `xml:"IssueInstant,attr"`
-	Issuer             Issuer `xml:"Issuer"`
-	Signature Signature `xml:"Signature"`
+	ID                 string    `xml:"ID,attr"`
+	Version            string    `xml:"Version,attr"`
+	XS                 string    `xml:"xmlns:xs,attr"`
+	XSI                string    `xml:"xmlns:xsi,attr"`
+	SAML               string    `xml:"saml,attr"`
+	IssueInstant       string    `xml:"IssueInstant,attr"`
+	Issuer             Issuer    `xml:"Issuer"`
+	Signature          Signature `xml:"Signature"`
 	Subject            Subject
 	Conditions         Conditions
 	AttributeStatement AttributeStatement
@@ -227,7 +227,7 @@ type Assertion struct {
 }
 
 type AuthnStatement struct {
-	SessionIndex       string `xml:"SessionIndex,attr"`
+	SessionIndex string `xml:"SessionIndex,attr"`
 }
 
 type Conditions struct {
