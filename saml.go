@@ -1,6 +1,6 @@
 package saml
 
-import "github.com/RobotsAndPencils/go-saml/util"
+import "github.com/wearableintelligence/go-saml/util"
 
 // ServiceProviderSettings provides settings to configure server acting as a SAML Service Provider.
 // Expect only one IDP per SP in this configuration. If you need to configure multipe IDPs for an SP
