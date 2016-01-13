@@ -20,7 +20,7 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/wearableintelligence/go-saml/util"
+	"github.com/RobotsAndPencils/go-saml/util"
 )
 
 // GetSignedAuthnRequest returns a singed XML document that represents a AuthnRequest SAML document
