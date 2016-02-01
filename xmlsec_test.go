@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/parsable/go-saml/util"
 	"github.com/stretchr/testify/assert"
 )
 
