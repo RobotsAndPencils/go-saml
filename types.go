@@ -70,7 +70,7 @@ type SignatureValue struct {
 
 type KeyInfo struct {
 	XMLName  xml.Name
-	X509Data X509Data `xml:",innerxml"`
+	X509Data X509Data `xml:"X509Data"`
 }
 
 type CanonicalizationMethod struct {
@@ -93,7 +93,7 @@ type SamlsigReference struct {
 
 type X509Data struct {
 	XMLName         xml.Name
-	X509Certificate X509Certificate `xml:",innerxml"`
+	X509Certificate X509Certificate `xml:"X509Certificate"`
 }
 
 type Transforms struct {
@@ -140,13 +140,29 @@ type Extensions struct {
 	EntityAttributes string `xml:"EntityAttributes"`
 }
 
+type SSODescriptor struct {
+	//ArtifactResolutionServices []ArtifactResolutionServices `xml:"ArtifactResolutionService"`
+	SingleLogoutService []SingleLogoutService `xml:"SingleLogoutService"`
+	//NameIDFormats              []NameIdFormat               `xml:"NameIDFormat"`
+}
+
 type SPSSODescriptor struct {
 	XMLName                    xml.Name
 	ProtocolSupportEnumeration string `xml:"protocolSupportEnumeration,attr"`
-	SigningKeyDescriptor       KeyDescriptor
-	EncryptionKeyDescriptor    KeyDescriptor
+	SSODescriptor
+	SigningKeyDescriptor    KeyDescriptor
+	EncryptionKeyDescriptor KeyDescriptor
 	// SingleLogoutService        SingleLogoutService `xml:"SingleLogoutService"`
 	AssertionConsumerServices []AssertionConsumerService
+}
+
+type IDPSSODescriptor struct {
+	XMLName                    xml.Name
+	ProtocolSupportEnumeration string `xml:"protocolSupportEnumeration,attr"`
+	SSODescriptor
+	KeyDescriptors      []KeyDescriptor
+	SingleSignOnService []SingleSignOnService `xml:"SingleSignOnService"`
+	Attributes          []Attribute
 }
 
 type EntityAttributes struct {
@@ -156,9 +172,6 @@ type EntityAttributes struct {
 	EntityAttributes []Attribute `xml:"Attribute"` // should be array??
 }
 
-type SPSSODescriptors struct {
-}
-
 type KeyDescriptor struct {
 	XMLName xml.Name
 	Use     string  `xml:"use,attr"`
@@ -166,6 +179,11 @@ type KeyDescriptor struct {
 }
 
 type SingleLogoutService struct {
+	Binding  string `xml:"Binding,attr"`
+	Location string `xml:"Location,attr"`
+}
+
+type SingleSignOnService struct {
 	Binding  string `xml:"Binding,attr"`
 	Location string `xml:"Location,attr"`
 }
@@ -307,4 +325,26 @@ type LogoutRequest struct {
 type SessionIndex struct {
 	XMLName xml.Name
 	Value   string `xml:",innerxml"`
+}
+
+type RoleDescriptor struct {
+	ValidUntil                 string          `xml:"validUntil,attr,omitempty"`
+	CacheDuration              string          `xml:"cacheDuration,attr,omitempty"`
+	ProtocolSupportEnumeration string          `xml:"protocolSupportEnumeration,attr"`
+	Signature                  *Signature      `xml:"Signature,omitempty"`
+	KeyDescriptors             []KeyDescriptor `xml:"KeyDescriptor,omitempty"`
+}
+
+type Metadata struct {
+	XMLName       xml.Name   // urn:oasis:names:tc:SAML:2.0:metadata:EntityDescriptor
+	ID            string     `xml:"ID,attr,omitempty"`
+	EntityId      string     `xml:"entityID,attr"`
+	ValidUntil    string     `xml:"validUntil,attr,omitempty"`
+	CacheDuration string     `xml:"cacheDuration,attr,omitempty"`
+	Signature     *Signature `xml:"Signature,omitempty"`
+
+	// note: the schema permits these elements to appear in any order an unlimited number of times
+	RoleDescriptor   []RoleDescriptor  `xml:"RoleDescriptor,omitempty"`
+	SPSSODescriptor  *SPSSODescriptor  `xml:"SPSSODescriptor,omitempty"`
+	IDPSSODescriptor *IDPSSODescriptor `xml:"IDPSSODescriptor,omitempty"`
 }
