@@ -258,12 +258,14 @@ func (r *Response) AddAttribute(name, value string) {
 		},
 		Name:       name,
 		NameFormat: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
-		AttributeValue: AttributeValue{
-			XMLName: xml.Name{
-				Local: "saml:AttributeValue",
+		AttributeValues: []AttributeValue{
+			{
+				XMLName: xml.Name{
+					Local: "saml:AttributeValue",
+				},
+				Type:  "xs:string",
+				Value: value,
 			},
-			Type:  "xs:string",
-			Value: value,
 		},
 	})
 }
@@ -309,8 +311,20 @@ func (r *Response) CompressedEncodedSignedString(privateKeyPath string) (string,
 func (r *Response) GetAttribute(name string) string {
 	for _, attr := range r.Assertion.AttributeStatement.Attributes {
 		if attr.Name == name || attr.FriendlyName == name {
-			return attr.AttributeValue.Value
+			return attr.AttributeValues[0].Value
 		}
 	}
 	return ""
+}
+
+func (r *Response) GetAttributeValues(name string) []string {
+	var values []string
+	for _, attr := range r.Assertion.AttributeStatement.Attributes {
+		if attr.Name == name || attr.FriendlyName == name {
+			for _, v := range attr.AttributeValues {
+				values = append(values, v.Value)
+			}
+		}
+	}
+	return values
 }
