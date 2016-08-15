@@ -79,7 +79,7 @@ func (s *ServiceProviderSettings) GetEntityDescriptor() (string, error) {
 			// 	Location: "---TODO---",
 			// },
 			AssertionConsumerServices: []AssertionConsumerService{
-				AssertionConsumerService{
+				{
 					XMLName: xml.Name{
 						Local: "md:AssertionConsumerService",
 					},
@@ -87,7 +87,7 @@ func (s *ServiceProviderSettings) GetEntityDescriptor() (string, error) {
 					Location: s.AssertionConsumerServiceURL,
 					Index:    "0",
 				},
-				AssertionConsumerService{
+				{
 					XMLName: xml.Name{
 						Local: "md:AssertionConsumerService",
 					},
