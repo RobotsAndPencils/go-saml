@@ -255,11 +255,11 @@ type AttributeValue struct {
 }
 
 type Attribute struct {
-	XMLName        xml.Name
-	Name           string `xml:",attr"`
-	FriendlyName   string `xml:",attr"`
-	NameFormat     string `xml:",attr"`
-	AttributeValue AttributeValue
+	XMLName         xml.Name
+	Name            string           `xml:",attr"`
+	FriendlyName    string           `xml:",attr"`
+	NameFormat      string           `xml:",attr"`
+	AttributeValues []AttributeValue `xml:"AttributeValue"`
 }
 
 type AttributeStatement struct {
