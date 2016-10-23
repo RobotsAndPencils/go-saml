@@ -90,6 +90,15 @@ func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 	return r
 }
 
+// GetAuthnRequest returns an unsinged XML document that represents a AuthnRequest SAML document
+func (s *ServiceProviderSettings) GetUnsignedAuthnRequest() *AuthnRequest {
+	r := NewUnsignedAuthnRequest()
+	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
+	r.Issuer.Url = s.IDPSSODescriptorURL
+
+	return r
+}
+
 // GetAuthnRequestURL generate a URL for the AuthnRequest to the IdP with the SAMLRequst parameter encoded
 func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, error) {
 	u, err := url.Parse(baseURL)
@@ -104,15 +113,32 @@ func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, er
 	return u.String(), nil
 }
 
+// NewAuthnRequest returns a new authentication request
 func NewAuthnRequest() *AuthnRequest {
 	id := util.ID()
+	req := baseAuthnRequest(id)
+	req.Signature = newAuthSignature(id)
+	req.SAMLSIG = "http://www.w3.org/2000/09/xmldsig#"
+
+	return req
+}
+
+// NewUnsignedAuthnRequest return a new authentication request w/o a signature
+func NewUnsignedAuthnRequest() *AuthnRequest {
+	id := util.ID()
+	req := baseAuthnRequest(id)
+
+	return req
+}
+
+func baseAuthnRequest(id string) *AuthnRequest {
 	return &AuthnRequest{
 		XMLName: xml.Name{
 			Local: "samlp:AuthnRequest",
 		},
 		SAMLP:                       "urn:oasis:names:tc:SAML:2.0:protocol",
 		SAML:                        "urn:oasis:names:tc:SAML:2.0:assertion",
-		SAMLSIG:                     "http://www.w3.org/2000/09/xmldsig#",
+		SAMLSIG:                     "",
 		ID:                          id,
 		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
 		Version:                     "2.0",
@@ -124,7 +150,7 @@ func NewAuthnRequest() *AuthnRequest {
 			Url:  "", // caller must populate ar.AppSettings.Issuer
 			SAML: "urn:oasis:names:tc:SAML:2.0:assertion",
 		},
-		IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
+		IssueInstant: time.Now().UTC().Format(time.RFC3339),
 		NameIDPolicy: NameIDPolicy{
 			XMLName: xml.Name{
 				Local: "samlp:NameIDPolicy",
@@ -146,75 +172,80 @@ func NewAuthnRequest() *AuthnRequest {
 				Transport: "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
 			},
 		},
-		Signature: Signature{
+		Signature: nil,
+	}
+
+}
+
+func newAuthSignature(id string) *Signature {
+	return &Signature{
+		XMLName: xml.Name{
+			Local: "samlsig:Signature",
+		},
+		Id: "Signature1",
+		SignedInfo: SignedInfo{
 			XMLName: xml.Name{
-				Local: "samlsig:Signature",
+				Local: "samlsig:SignedInfo",
 			},
-			Id: "Signature1",
-			SignedInfo: SignedInfo{
+			CanonicalizationMethod: CanonicalizationMethod{
 				XMLName: xml.Name{
-					Local: "samlsig:SignedInfo",
+					Local: "samlsig:CanonicalizationMethod",
 				},
-				CanonicalizationMethod: CanonicalizationMethod{
-					XMLName: xml.Name{
-						Local: "samlsig:CanonicalizationMethod",
-					},
-					Algorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
+				Algorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
+			},
+			SignatureMethod: SignatureMethod{
+				XMLName: xml.Name{
+					Local: "samlsig:SignatureMethod",
 				},
-				SignatureMethod: SignatureMethod{
-					XMLName: xml.Name{
-						Local: "samlsig:SignatureMethod",
-					},
-					Algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+				Algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+			},
+			SamlsigReference: SamlsigReference{
+				XMLName: xml.Name{
+					Local: "samlsig:Reference",
 				},
-				SamlsigReference: SamlsigReference{
+				URI: "#" + id,
+				Transforms: Transforms{
 					XMLName: xml.Name{
-						Local: "samlsig:Reference",
+						Local: "samlsig:Transforms",
 					},
-					URI: "#" + id,
-					Transforms: Transforms{
+					Transform: Transform{
 						XMLName: xml.Name{
-							Local: "samlsig:Transforms",
+							Local: "samlsig:Transform",
 						},
-						Transform: Transform{
-							XMLName: xml.Name{
-								Local: "samlsig:Transform",
-							},
-							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
-						},
+						Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 					},
-					DigestMethod: DigestMethod{
-						XMLName: xml.Name{
-							Local: "samlsig:DigestMethod",
-						},
-						Algorithm: "http://www.w3.org/2000/09/xmldsig#sha1",
+				},
+				DigestMethod: DigestMethod{
+					XMLName: xml.Name{
+						Local: "samlsig:DigestMethod",
 					},
-					DigestValue: DigestValue{
-						XMLName: xml.Name{
-							Local: "samlsig:DigestValue",
-						},
+					Algorithm: "http://www.w3.org/2000/09/xmldsig#sha1",
+				},
+				DigestValue: DigestValue{
+					XMLName: xml.Name{
+						Local: "samlsig:DigestValue",
 					},
 				},
 			},
-			SignatureValue: SignatureValue{
-				XMLName: xml.Name{
-					Local: "samlsig:SignatureValue",
-				},
+		},
+		SignatureValue: SignatureValue{
+			XMLName: xml.Name{
+				Local: "samlsig:SignatureValue",
 			},
-			KeyInfo: KeyInfo{
+		},
+		KeyInfo: KeyInfo{
+			XMLName: xml.Name{
+				Local: "samlsig:KeyInfo",
+			},
+			X509Data: X509Data{
 				XMLName: xml.Name{
-					Local: "samlsig:KeyInfo",
+					Local: "samlsig:X509Data",
 				},
-				X509Data: X509Data{
+				X509Certificate: X509Certificate{
 					XMLName: xml.Name{
-						Local: "samlsig:X509Data",
+						Local: "samlsig:X509Certificate",
 					},
-					X509Certificate: X509Certificate{
-						XMLName: xml.Name{
-							Local: "samlsig:X509Certificate",
-						},
-						Cert: "", // caller must populate cert,
-					},
+					Cert: "", // caller must populate cert,
 				},
 			},
 		},

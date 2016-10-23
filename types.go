@@ -6,18 +6,18 @@ type AuthnRequest struct {
 	XMLName                        xml.Name
 	SAMLP                          string                `xml:"xmlns:samlp,attr"`
 	SAML                           string                `xml:"xmlns:saml,attr"`
-	SAMLSIG                        string                `xml:"xmlns:samlsig,attr"`
+	SAMLSIG                        string                `xml:"xmlns:samlsig,attr,omitempty"`
 	ID                             string                `xml:"ID,attr"`
 	Version                        string                `xml:"Version,attr"`
 	ProtocolBinding                string                `xml:"ProtocolBinding,attr"`
 	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
 	IssueInstant                   string                `xml:"IssueInstant,attr"`
-	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr"`
-	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr"`
+	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr,omitempty"`
+	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr,omitempty"`
 	Issuer                         Issuer                `xml:"Issuer"`
 	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
 	RequestedAuthnContext          RequestedAuthnContext `xml:"RequestedAuthnContext"`
-	Signature                      Signature             `xml:"Signature,omitempty"`
+	Signature                      *Signature            `xml:"Signature,omitempty"`
 	originalString                 string
 }
 
