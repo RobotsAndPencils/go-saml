@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/parsable/go-saml/util"
 )
 
 func ParseCompressedEncodedRequest(b64RequestXML string) (*AuthnRequest, error) {
@@ -82,10 +82,13 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 
 // GetSignedAuthnRequest returns a singed XML document that represents a AuthnRequest SAML document
 func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
-	r := NewAuthnRequest()
+	r := NewAuthnRequestCustom(s.SPSignRequest)
 	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
 	r.Issuer.Url = s.IDPSSODescriptorURL
-	r.Signature.KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
+	if s.SPSignRequest {
+		r.Signature[0].KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
+		r.Destination = s.IDPSSOURL
+	}
 
 	return r
 }
@@ -105,14 +108,17 @@ func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, er
 }
 
 func NewAuthnRequest() *AuthnRequest {
+	return NewAuthnRequestCustom(true)
+}
+
+func NewAuthnRequestCustom(sign bool) *AuthnRequest {
 	id := util.ID()
-	return &AuthnRequest{
+	authReq := &AuthnRequest{
 		XMLName: xml.Name{
 			Local: "samlp:AuthnRequest",
 		},
 		SAMLP:                       "urn:oasis:names:tc:SAML:2.0:protocol",
 		SAML:                        "urn:oasis:names:tc:SAML:2.0:assertion",
-		SAMLSIG:                     "http://www.w3.org/2000/09/xmldsig#",
 		ID:                          id,
 		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
 		Version:                     "2.0",
@@ -122,31 +128,33 @@ func NewAuthnRequest() *AuthnRequest {
 				Local: "saml:Issuer",
 			},
 			Url:  "", // caller must populate ar.AppSettings.Issuer
-			SAML: "urn:oasis:names:tc:SAML:2.0:assertion",
 		},
-		IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
-		NameIDPolicy: NameIDPolicy{
+		IssueInstant: time.Now().UTC().Format(time.RFC3339),
+		NameIDPolicy: &NameIDPolicy{
 			XMLName: xml.Name{
 				Local: "samlp:NameIDPolicy",
 			},
 			AllowCreate: true,
-			Format:      "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+			Format:      "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
 		},
-		RequestedAuthnContext: RequestedAuthnContext{
+		RequestedAuthnContext: &RequestedAuthnContext{
 			XMLName: xml.Name{
 				Local: "samlp:RequestedAuthnContext",
 			},
-			SAMLP:      "urn:oasis:names:tc:SAML:2.0:protocol",
 			Comparison: "exact",
 			AuthnContextClassRef: AuthnContextClassRef{
 				XMLName: xml.Name{
 					Local: "saml:AuthnContextClassRef",
 				},
-				SAML:      "urn:oasis:names:tc:SAML:2.0:assertion",
 				Transport: "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
 			},
 		},
-		Signature: Signature{
+	}
+
+	if sign {
+		authReq.SAMLSIG = "http://www.w3.org/2000/09/xmldsig#"
+		authReq.Signature = make([]Signature, 1, 1)
+		authReq.Signature[0] = Signature{
 			XMLName: xml.Name{
 				Local: "samlsig:Signature",
 			},
@@ -165,7 +173,7 @@ func NewAuthnRequest() *AuthnRequest {
 					XMLName: xml.Name{
 						Local: "samlsig:SignatureMethod",
 					},
-					Algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+					Algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
 				},
 				SamlsigReference: SamlsigReference{
 					XMLName: xml.Name{
@@ -176,18 +184,26 @@ func NewAuthnRequest() *AuthnRequest {
 						XMLName: xml.Name{
 							Local: "samlsig:Transforms",
 						},
-						Transform: Transform{
-							XMLName: xml.Name{
-								Local: "samlsig:Transform",
+						Transforms: []Transform{
+							{
+								XMLName: xml.Name{
+									Local: "samlsig:Transform",
+								},
+								Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 							},
-							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+							{
+								XMLName: xml.Name{
+									Local: "samlsig:Transform",
+								},
+								Algorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
+							},
 						},
 					},
 					DigestMethod: DigestMethod{
 						XMLName: xml.Name{
 							Local: "samlsig:DigestMethod",
 						},
-						Algorithm: "http://www.w3.org/2000/09/xmldsig#sha1",
+						Algorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
 					},
 					DigestValue: DigestValue{
 						XMLName: xml.Name{
@@ -217,12 +233,13 @@ func NewAuthnRequest() *AuthnRequest {
 					},
 				},
 			},
-		},
+		}
 	}
+	return authReq
 }
 
 func (r *AuthnRequest) String() (string, error) {
-	b, err := xml.MarshalIndent(r, "", "    ")
+	b, err := xml.Marshal(r)
 	if err != nil {
 		return "", err
 	}

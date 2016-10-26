@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/parsable/go-saml/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +15,7 @@ func TestRequest(t *testing.T) {
 
 	// Construct an AuthnRequest
 	authRequest := NewAuthnRequest()
-	authRequest.Signature.KeyInfo.X509Data.X509Certificate.Cert = cert
+	authRequest.Signature[0].KeyInfo.X509Data.X509Certificate.Cert = cert
 
 	b, err := xml.MarshalIndent(authRequest, "", "    ")
 	assert.NoError(err)

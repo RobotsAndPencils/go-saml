@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/parsable/go-saml/util"
 )
 
 func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
@@ -29,20 +29,21 @@ func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
 }
 
 func ParseEncodedResponse(b64ResponseXML string) (*Response, error) {
-	response := Response{}
 	bytesXML, err := base64.StdEncoding.DecodeString(b64ResponseXML)
 	if err != nil {
 		return nil, err
 	}
-	err = xml.Unmarshal(bytesXML, &response)
+	return ParseDecodedResponse(bytesXML)
+}
+
+func ParseDecodedResponse(responseXML []byte) (*Response, error) {
+	response := Response{}
+	err := xml.Unmarshal(responseXML, &response)
 	if err != nil {
 		return nil, err
 	}
-
-	// There is a bug with XML namespaces in Go that's causing XML attributes with colons to not be roundtrip
-	// marshal and unmarshaled so we'll keep the original string around for validation.
-	response.originalString = string(bytesXML)
-	// fmt.Println(response.originalString)
+	// save the original response because XML Signatures are fussy
+	response.originalString = string(responseXML)
 	return &response, nil
 }
 
@@ -75,7 +76,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+	err := r.VerifySignature(s.IDPPublicCertPath)
 	if err != nil {
 		return err
 	}
@@ -91,6 +92,52 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 	}
 
 	return nil
+}
+
+func (r *Response) FindSignatureTagName() (string, error) {
+	sigRef := r.Signature.SignedInfo.SamlsigReference.URI
+	if len(sigRef) == 0 {
+		sigRef = r.Assertion.Signature.SignedInfo.SamlsigReference.URI
+		if len(sigRef) == 0 && r.EncryptedAssertion.Assertion != nil {
+			sigRef = r.EncryptedAssertion.Assertion.Signature.SignedInfo.SamlsigReference.URI
+		}
+		if len(sigRef) == 0 {
+			return "", errors.New("No signature found in a supported location")
+		}
+	}
+	if sigRef[0] != '#' {
+		return "", errors.New("Weird Signature Reference URI: " + sigRef)
+	}
+	if r.ID == sigRef[1:] {
+		return "Response", nil
+	}
+	if r.Assertion.ID == sigRef[1:] {
+		return "Assertion", nil
+	}
+	if r.EncryptedAssertion.Assertion != nil && r.EncryptedAssertion.Assertion.ID == sigRef[1:] {
+		// this ambiguity makes xmlsec1 CLI not terribly useful...
+		return "Assertion", nil
+	}
+	return "", errors.New("could not resolve signature reference URI: " + sigRef)
+}
+
+func (r *Response) Decrypt(SPPrivateCertPath string) (*Response, error) {
+	decrypted_xml, err := Decrypt(r.originalString, SPPrivateCertPath)
+	if err != nil {
+		return nil, err
+	}
+	authnResponse := &Response{}
+	err = xml.Unmarshal(decrypted_xml, &authnResponse)
+	authnResponse.originalString = string(decrypted_xml)
+	return authnResponse, err
+}
+
+func (r *Response) VerifySignature(IDPPublicCertPath string) error {
+	sigTagName, err := r.FindSignatureTagName()
+	if err != nil {
+		return err
+	}
+	return VerifyResponseSignature(r.originalString, IDPPublicCertPath, sigTagName)
 }
 
 func NewSignedResponse() *Response {
@@ -140,11 +187,13 @@ func NewSignedResponse() *Response {
 						XMLName: xml.Name{
 							Local: "samlsig:Transforms",
 						},
-						Transform: Transform{
-							XMLName: xml.Name{
-								Local: "samlsig:Transform",
+						Transforms: []Transform{
+							{
+								XMLName: xml.Name{
+									Local: "samlsig:Transform",
+								},
+								Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 							},
-							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 						},
 					},
 					DigestMethod: DigestMethod{
