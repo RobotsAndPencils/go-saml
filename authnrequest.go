@@ -87,6 +87,11 @@ func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
 	r.Issuer.Url = s.IDPSSODescriptorURL
 	r.Signature.KeyInfo.X509Data.X509Certificate.Cert = s.PublicCert()
 
+	if !s.SPSignRequest {
+		r.SAMLSIG = ""
+		r.Signature = nil
+	}
+
 	return r
 }
 
@@ -146,7 +151,7 @@ func NewAuthnRequest() *AuthnRequest {
 				Transport: "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
 			},
 		},
-		Signature: Signature{
+		Signature: &Signature{
 			XMLName: xml.Name{
 				Local: "samlsig:Signature",
 			},
