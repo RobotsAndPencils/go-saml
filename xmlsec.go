@@ -27,7 +27,18 @@ func SignResponse(xml string, privateKeyPath string) (string, error) {
 	return sign(xml, privateKeyPath, xmlResponseID)
 }
 
+func rejectDocType(xml string) error {
+	if strings.Contains(xml, "<!DOCTYPE") {
+		return errors.New("Cannot sign/verify XML with DOCTYPE")
+	}
+	return nil
+}
+
 func sign(xml string, privateKeyPath string, id string) (string, error) {
+	err := rejectDocType(xml)
+	if err != nil {
+		return "", err
+	}
 
 	samlXmlsecInput, err := ioutil.TempFile(os.TempDir(), "tmpgs")
 	if err != nil {
@@ -78,6 +89,11 @@ func VerifyRequestSignature(xml string, publicCertPath string) error {
 }
 
 func verify(xml string, publicCertPath string, id string) error {
+	err := rejectDocType(xml)
+	if err != nil {
+		return err
+	}
+
 	//Write saml to
 	samlXmlsecInput, err := ioutil.TempFile(os.TempDir(), "tmpgs")
 	if err != nil {
@@ -91,7 +107,7 @@ func verify(xml string, publicCertPath string, id string) error {
 	//fmt.Println("xmlsec1", "--verify", "--pubkey-cert-pem", publicCertPath, "--id-attr:ID", id, samlXmlsecInput.Name())
 	_, err = exec.Command("xmlsec1", "--verify", "--pubkey-cert-pem", publicCertPath, "--id-attr:ID", id, samlXmlsecInput.Name()).CombinedOutput()
 	if err != nil {
-		return errors.New("error verifing signature: " + err.Error())
+		return errors.New("error verifying signature: " + err.Error())
 	}
 	return nil
 }
