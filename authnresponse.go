@@ -75,7 +75,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+	err := Verify(r.originalString, s.IDPPublicCertPath)
 	if err != nil {
 		return err
 	}
@@ -285,7 +285,7 @@ func (r *Response) SignedString(privateKeyPath string) (string, error) {
 		return "", err
 	}
 
-	return SignResponse(s, privateKeyPath)
+	return Sign(s, privateKeyPath)
 }
 
 func (r *Response) EncodedSignedString(privateKeyPath string) (string, error) {

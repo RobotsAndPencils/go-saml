@@ -21,11 +21,11 @@ func TestRequest(t *testing.T) {
 	assert.NoError(err)
 	xmlAuthnRequest := string(b)
 
-	signedXml, err := SignRequest(xmlAuthnRequest, "./default.key")
+	signedXml, err := Sign(xmlAuthnRequest, "./default.key")
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	err = VerifyRequestSignature(signedXml, "./default.crt")
+	err = Verify(signedXml, "./default.crt")
 	assert.NoError(err)
 }
 
@@ -42,10 +42,10 @@ func TestResponse(t *testing.T) {
 	assert.NoError(err)
 	xmlResponse := string(b)
 
-	signedXml, err := SignResponse(xmlResponse, "./default.key")
+	signedXml, err := Sign(xmlResponse, "./default.key")
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	err = VerifyRequestSignature(signedXml, "./default.crt")
+	err = Verify(signedXml, "./default.crt")
 	assert.NoError(err)
 }
