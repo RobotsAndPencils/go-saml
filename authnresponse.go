@@ -114,7 +114,7 @@ func NewSignedResponse() *Response {
 			XMLName: xml.Name{
 				Local: "samlsig:Signature",
 			},
-			Id: "Signature1",
+			Id: util.ID(),
 			SignedInfo: SignedInfo{
 				XMLName: xml.Name{
 					Local: "samlsig:SignedInfo",
@@ -140,12 +140,12 @@ func NewSignedResponse() *Response {
 						XMLName: xml.Name{
 							Local: "samlsig:Transforms",
 						},
-						Transform: Transform{
+						Transform: []Transform{Transform{
 							XMLName: xml.Name{
 								Local: "samlsig:Transform",
 							},
 							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
-						},
+						}},
 					},
 					DigestMethod: DigestMethod{
 						XMLName: xml.Name{
@@ -218,8 +218,9 @@ func NewSignedResponse() *Response {
 					XMLName: xml.Name{
 						Local: "saml:NameID",
 					},
-					Format: "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
-					Value:  "",
+					Format:          "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+					Value:           "",
+					SPNameQualifier: "",
 				},
 				SubjectConfirmation: SubjectConfirmation{
 					XMLName: xml.Name{
@@ -227,6 +228,9 @@ func NewSignedResponse() *Response {
 					},
 					Method: "urn:oasis:names:tc:SAML:2.0:cm:bearer",
 					SubjectConfirmationData: SubjectConfirmationData{
+						XMLName: xml.Name{
+							Local: "saml:SubjectConfirmationData",
+						},
 						InResponseTo: "",
 						NotOnOrAfter: time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339Nano),
 						Recipient:    "",
@@ -237,8 +241,9 @@ func NewSignedResponse() *Response {
 				XMLName: xml.Name{
 					Local: "saml:Conditions",
 				},
-				NotBefore:    time.Now().Add(time.Minute * -5).UTC().Format(time.RFC3339Nano),
-				NotOnOrAfter: time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339Nano),
+				NotBefore:            time.Now().Add(time.Minute * -5).UTC().Format(time.RFC3339Nano),
+				NotOnOrAfter:         time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339Nano),
+				AudienceRestrictions: []AudienceRestriction{},
 			},
 			AttributeStatement: AttributeStatement{
 				XMLName: xml.Name{
@@ -265,6 +270,42 @@ func (r *Response) AddAttribute(name, value string) {
 				},
 				Type:  "xs:string",
 				Value: value,
+			},
+		},
+	})
+}
+
+func (r *Response) AddAudienceRestriction(value string) {
+	r.Assertion.Conditions.AudienceRestrictions = append(r.Assertion.Conditions.AudienceRestrictions,
+		AudienceRestriction{XMLName: xml.Name{
+			Local: "saml:AudienceRestriction",
+		},
+			Audiences: []Audience{Audience{XMLName: xml.Name{
+				Local: "saml:Audience",
+			},
+				Value: value,
+			},
+			},
+		})
+}
+
+func (r *Response) AddAuthnStatement(transport string, sessionIndex string) {
+	r.Assertion.AuthnStatements = append(r.Assertion.AuthnStatements, AuthnStatement{
+		XMLName: xml.Name{
+			Local: "saml:AuthnStatement",
+		},
+		AuthnInstant:        r.IssueInstant,
+		SessionIndex:        sessionIndex,
+		SessionNotOnOrAfter: r.Assertion.Conditions.NotOnOrAfter,
+		AuthnContext: AuthnContext{
+			XMLName: xml.Name{
+				Local: "saml:AuthnContext",
+			},
+			AuthnContextClassRef: AuthnContextClassRef{
+				XMLName: xml.Name{
+					Local: "saml:AuthnContextClassRef",
+				},
+				Transport: transport,
 			},
 		},
 	})
