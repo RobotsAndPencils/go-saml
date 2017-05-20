@@ -182,12 +182,12 @@ func NewAuthnRequest() *AuthnRequest {
 						XMLName: xml.Name{
 							Local: "samlsig:Transforms",
 						},
-						Transform: Transform{
+						Transform: []Transform{Transform{
 							XMLName: xml.Name{
 								Local: "samlsig:Transform",
 							},
 							Algorithm: "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
-						},
+						}},
 					},
 					DigestMethod: DigestMethod{
 						XMLName: xml.Name{

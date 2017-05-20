@@ -97,7 +97,7 @@ type X509Data struct {
 
 type Transforms struct {
 	XMLName   xml.Name
-	Transform Transform
+	Transform []Transform
 }
 
 type DigestMethod struct {
@@ -187,10 +187,10 @@ type Response struct {
 	IssueInstant string `xml:"IssueInstant,attr"`
 	InResponseTo string `xml:"InResponseTo,attr"`
 
-	Assertion Assertion `xml:"Assertion"`
-	Signature Signature `xml:"Signature"`
 	Issuer    Issuer    `xml:"Issuer"`
+	Signature Signature `xml:"Signature"`
 	Status    Status    `xml:"Status"`
+	Assertion Assertion `xml:"Assertion"`
 
 	originalString string
 }
@@ -201,18 +201,30 @@ type Assertion struct {
 	Version            string `xml:"Version,attr"`
 	XS                 string `xml:"xmlns:xs,attr"`
 	XSI                string `xml:"xmlns:xsi,attr"`
-	SAML               string `xml:"saml,attr"`
+	SAML               string `xml:"xmlns:saml,attr"`
 	IssueInstant       string `xml:"IssueInstant,attr"`
 	Issuer             Issuer `xml:"Issuer"`
 	Subject            Subject
 	Conditions         Conditions
+	AuthnStatements    []AuthnStatement `xml:"AuthnStatement,omitempty"`
 	AttributeStatement AttributeStatement
 }
 
 type Conditions struct {
-	XMLName      xml.Name
-	NotBefore    string `xml:",attr"`
-	NotOnOrAfter string `xml:",attr"`
+	XMLName              xml.Name
+	NotBefore            string                `xml:",attr"`
+	NotOnOrAfter         string                `xml:",attr"`
+	AudienceRestrictions []AudienceRestriction `xml:"AudienceRestriction,omitempty"`
+}
+
+type AudienceRestriction struct {
+	XMLName   xml.Name
+	Audiences []Audience `xml:"Audience"`
+}
+
+type Audience struct {
+	XMLName xml.Name
+	Value   string `xml:",innerxml"`
 }
 
 type Subject struct {
@@ -233,15 +245,17 @@ type Status struct {
 }
 
 type SubjectConfirmationData struct {
+	XMLName      xml.Name
 	InResponseTo string `xml:",attr"`
 	NotOnOrAfter string `xml:",attr"`
 	Recipient    string `xml:",attr"`
 }
 
 type NameID struct {
-	XMLName xml.Name
-	Format  string `xml:",attr"`
-	Value   string `xml:",innerxml"`
+	XMLName         xml.Name
+	Format          string `xml:",attr"`
+	SPNameQualifier string `xml:",attr,omitempty"`
+	Value           string `xml:",innerxml"`
 }
 
 type StatusCode struct {
@@ -258,7 +272,7 @@ type AttributeValue struct {
 type Attribute struct {
 	XMLName         xml.Name
 	Name            string           `xml:",attr"`
-	FriendlyName    string           `xml:",attr"`
+	FriendlyName    string           `xml:",attr,omitempty"`
 	NameFormat      string           `xml:",attr"`
 	AttributeValues []AttributeValue `xml:"AttributeValue"`
 }
@@ -266,4 +280,17 @@ type Attribute struct {
 type AttributeStatement struct {
 	XMLName    xml.Name
 	Attributes []Attribute `xml:"Attribute"`
+}
+
+type AuthnStatement struct {
+	XMLName             xml.Name
+	AuthnInstant        string       `xml:",attr"`
+	SessionNotOnOrAfter string       `xml:",attr,omitempty"`
+	SessionIndex        string       `xml:",attr,omitempty"`
+	AuthnContext        AuthnContext `xml:"AuthnContext"`
+}
+
+type AuthnContext struct {
+	XMLName              xml.Name
+	AuthnContextClassRef AuthnContextClassRef `xml:"AuthnContextClassRef"`
 }
