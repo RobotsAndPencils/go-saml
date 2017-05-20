@@ -72,7 +72,7 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 
 	// TODO more validation
 
-	err := VerifyRequestSignature(r.originalString, publicCertPath)
+	err := Verify(r.originalString, publicCertPath)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func (r *AuthnRequest) SignedString(privateKeyPath string) (string, error) {
 		return "", err
 	}
 
-	return SignRequest(s, privateKeyPath)
+	return Sign(s, privateKeyPath)
 }
 
 // GetAuthnRequestURL generate a URL for the AuthnRequest to the IdP with the SAMLRequst parameter encoded
