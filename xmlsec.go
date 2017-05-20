@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	xmlResponseID = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
-	xmlRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+	xmlResponseID  = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
+	xmlAssertionID = "urn:oasis:names:tc:SAML:2.0:assertion:Assertion"
+	xmlRequestID   = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
 )
 
 // SignRequest sign a SAML 2.0 AuthnRequest
@@ -67,17 +68,21 @@ func sign(xml string, privateKeyPath string, id string) (string, error) {
 // `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
 // through `exec`
 func VerifyResponseSignature(xml string, publicCertPath string) error {
-	return verify(xml, publicCertPath, xmlResponseID)
+	return Verify(xml, publicCertPath, xmlResponseID)
 }
 
 // VerifyRequestSignature verify signature of a SAML 2.0 AuthnRequest document
 // `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
 // through `exec`
 func VerifyRequestSignature(xml string, publicCertPath string) error {
-	return verify(xml, publicCertPath, xmlRequestID)
+	return Verify(xml, publicCertPath, xmlRequestID)
 }
 
-func verify(xml string, publicCertPath string, id string) error {
+func Verify(xml string, publicCertPath string, id string) error {
+	if len(id) == 0 {
+		id = xmlRequestID
+	}
+
 	//Write saml to
 	samlXmlsecInput, err := ioutil.TempFile(os.TempDir(), "tmpgs")
 	if err != nil {

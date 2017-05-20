@@ -59,7 +59,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("no Assertions")
 	}
 
-	if len(r.Signature.SignatureValue.Value) == 0 {
+	if len(r.Signature.SignatureValue.Value) == 0 && len(r.Assertion.Signature.SignatureValue.Value) == 0 {
 		return errors.New("no signature")
 	}
 
@@ -75,7 +75,15 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+	nodeNamespaceURI := ""
+
+	if len(r.Signature.SignatureValue.Value) != 0 {
+		nodeNamespaceURI = xmlResponseID
+	} else if len(r.Assertion.Signature.SignatureValue.Value) != 0 {
+		nodeNamespaceURI = xmlAssertionID
+	}
+
+	err := Verify(r.originalString, s.IDPPublicCertPath, nodeNamespaceURI)
 	if err != nil {
 		return err
 	}
