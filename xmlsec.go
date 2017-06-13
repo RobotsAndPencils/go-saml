@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	xmlResponseID = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
-	xmlRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+	xmlResponseID  = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
+	xmlRequestID   = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+	xmlAssertionID = "urn:oasis:names:tc:SAML:2.0:assertion:Assertion"
 )
 
 // SignRequest sign a SAML 2.0 AuthnRequest
@@ -75,6 +76,13 @@ func VerifyResponseSignature(xml string, publicCertPath string) error {
 // through `exec`
 func VerifyRequestSignature(xml string, publicCertPath string) error {
 	return verify(xml, publicCertPath, xmlRequestID)
+}
+
+// VerifyAssertionSignature verify signature of a SAML 2.0 Response document
+// `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
+// through `exec`
+func VerifyAssertionSignature(xml string, publicCertPath string) error {
+	return verify(xml, publicCertPath, xmlAssertionID)
 }
 
 func verify(xml string, publicCertPath string, id string) error {
