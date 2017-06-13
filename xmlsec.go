@@ -67,12 +67,8 @@ func sign(xml string, privateKeyPath string, id string) (string, error) {
 // VerifyResponseSignature verify signature of a SAML 2.0 Response document
 // `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
 // through `exec`
-func VerifyResponseSignature(xml string, publicCertPath string, inAssertion bool) error {
-	elementID := xmlResponseID
-	if inAssertion {
-		elementID = xmlAssertionID
-	}
-	return verify(xml, publicCertPath, elementID)
+func VerifyResponseSignature(xml string, publicCertPath string) error {
+	return verify(xml, publicCertPath, xmlResponseID)
 }
 
 // VerifyRequestSignature verify signature of a SAML 2.0 AuthnRequest document
@@ -80,6 +76,13 @@ func VerifyResponseSignature(xml string, publicCertPath string, inAssertion bool
 // through `exec`
 func VerifyRequestSignature(xml string, publicCertPath string) error {
 	return verify(xml, publicCertPath, xmlRequestID)
+}
+
+// VerifyAssertionSignature verify signature of a SAML 2.0 Response document
+// `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
+// through `exec`
+func VerifyAssertionSignature(xml string, publicCertPath string) error {
+	return verify(xml, publicCertPath, xmlAssertionID)
 }
 
 func verify(xml string, publicCertPath string, id string) error {

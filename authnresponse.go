@@ -75,7 +75,12 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := VerifyResponseSignature(r.originalString, s.IDPPublicCertPath, s.SignaturesInAssertion)
+	var err error
+	if s.SignaturesInAssertion {
+		err = VerifyAssertionSignature(r.originalString, s.IDPPublicCertPath)
+	} else {
+		err = VerifyResponseSignature(r.originalString, s.IDPPublicCertPath)
+	}
 	if err != nil {
 		return err
 	}
