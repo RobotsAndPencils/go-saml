@@ -59,7 +59,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("no Assertions")
 	}
 
-	if len(r.Signature.SignatureValue.Value) == 0 {
+	if len(r.Signature.SignatureValue.Value) == 0 && len(r.Assertion.Signature.SignatureValue.Value) == 0 {
 		return errors.New("no signature")
 	}
 
