@@ -54,8 +54,12 @@ if err != nil {
   panic(err)
 }
 
+// "RelayState" token is an opaque reference to state information maintained at the service provider
+// (e.g. resource identifier at SP that identity provider will redirect user back to)
+relaystate := ""
+
 // for convenience, get a URL formed with the SAMLRequest parameter
-url, err := saml.GetAuthnRequestURL(sp.IDPSSOURL, b64XML)
+url, err := saml.GetAuthnRequestURL(sp.IDPSSOURL, b64XML, relaystate)
 if err != nil {
   panic(err)
 }
