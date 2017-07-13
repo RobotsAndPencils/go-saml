@@ -42,7 +42,7 @@ sp := saml.ServiceProviderSettings{
   IDPSSOURL:                   "http://idp/saml2",
   IDPSSODescriptorURL:         "http://idp/issuer",
   IDPPublicCertPath:           "idpcert.crt",
-  SPSignRequest:               "true",
+  SPSignRequest:               true,
   AssertionConsumerServiceURL: "http://localhost:8000/saml_consume",
 }
 sp.Init()
