@@ -240,8 +240,9 @@ type SubjectConfirmation struct {
 }
 
 type Status struct {
-	XMLName    xml.Name
-	StatusCode StatusCode `xml:"StatusCode"`
+	XMLName       xml.Name
+	StatusCode    StatusCode    `xml:"StatusCode"`
+	StatusMessage StatusMessage `xml:"StatusMessage"`
 }
 
 type SubjectConfirmationData struct {
@@ -259,8 +260,14 @@ type NameID struct {
 }
 
 type StatusCode struct {
+	XMLName    xml.Name
+	StatusCode *StatusCode `xml:"StatusCode"`
+	Value      string      `xml:",attr"`
+}
+
+type StatusMessage struct {
 	XMLName xml.Name
-	Value   string `xml:",attr"`
+	Value   string `xml:",chardata"`
 }
 
 type AttributeValue struct {

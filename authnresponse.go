@@ -348,6 +348,15 @@ func (r *Response) CompressedEncodedSignedString(privateKeyPath string) (string,
 	return b64XML, nil
 }
 
+// GetStatusCode will check for nested status code values
+func (r *Response) GetStatusCode() string {
+	statusCode := r.Status.StatusCode
+	if statusCode.StatusCode != nil {
+		return statusCode.StatusCode.Value
+	}
+	return statusCode.Value
+}
+
 // GetAttribute by Name or by FriendlyName. Return blank string if not found
 func (r *Response) GetAttribute(name string) string {
 	for _, attr := range r.Assertion.AttributeStatement.Attributes {
