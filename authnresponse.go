@@ -103,7 +103,7 @@ func NewSignedResponse() *Response {
 		SAMLSIG:      "http://www.w3.org/2000/09/xmldsig#",
 		ID:           util.ID(),
 		Version:      "2.0",
-		IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
+		IssueInstant: time.Now().UTC().Format(time.RFC3339),
 		Issuer: Issuer{
 			XMLName: xml.Name{
 				Local: "saml:Issuer",
@@ -203,7 +203,7 @@ func NewSignedResponse() *Response {
 			SAML:         "urn:oasis:names:tc:SAML:2.0:assertion",
 			Version:      "2.0",
 			ID:           util.ID(),
-			IssueInstant: time.Now().UTC().Format(time.RFC3339Nano),
+			IssueInstant: time.Now().UTC().Format(time.RFC3339),
 			Issuer: Issuer{
 				XMLName: xml.Name{
 					Local: "saml:Issuer",
@@ -232,7 +232,7 @@ func NewSignedResponse() *Response {
 							Local: "saml:SubjectConfirmationData",
 						},
 						InResponseTo: "",
-						NotOnOrAfter: time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339Nano),
+						NotOnOrAfter: time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339),
 						Recipient:    "",
 					},
 				},
@@ -241,8 +241,8 @@ func NewSignedResponse() *Response {
 				XMLName: xml.Name{
 					Local: "saml:Conditions",
 				},
-				NotBefore:            time.Now().Add(time.Minute * -5).UTC().Format(time.RFC3339Nano),
-				NotOnOrAfter:         time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339Nano),
+				NotBefore:            time.Now().Add(time.Minute * -5).UTC().Format(time.RFC3339),
+				NotOnOrAfter:         time.Now().Add(time.Minute * 5).UTC().Format(time.RFC3339),
 				AudienceRestrictions: []AudienceRestriction{},
 			},
 			AttributeStatement: AttributeStatement{
