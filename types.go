@@ -13,7 +13,6 @@ type AuthnRequest struct {
 	AssertionConsumerServiceURL    string                `xml:"AssertionConsumerServiceURL,attr"`
 	Destination                    string                `xml:"Destination,attr"`
 	IssueInstant                   string                `xml:"IssueInstant,attr"`
-	AssertionConsumerServiceIndex  int                   `xml:"AssertionConsumerServiceIndex,attr"`
 	AttributeConsumingServiceIndex int                   `xml:"AttributeConsumingServiceIndex,attr"`
 	Issuer                         Issuer                `xml:"Issuer"`
 	NameIDPolicy                   NameIDPolicy          `xml:"NameIDPolicy"`
@@ -240,8 +239,9 @@ type SubjectConfirmation struct {
 }
 
 type Status struct {
-	XMLName    xml.Name
-	StatusCode StatusCode `xml:"StatusCode"`
+	XMLName       xml.Name
+	StatusCode    StatusCode    `xml:"StatusCode"`
+	StatusMessage StatusMessage `xml:"StatusMessage"`
 }
 
 type SubjectConfirmationData struct {
@@ -259,8 +259,14 @@ type NameID struct {
 }
 
 type StatusCode struct {
+	XMLName    xml.Name
+	StatusCode *StatusCode `xml:"StatusCode"`
+	Value      string      `xml:",attr"`
+}
+
+type StatusMessage struct {
 	XMLName xml.Name
-	Value   string `xml:",attr"`
+	Value   string `xml:",chardata"`
 }
 
 type AttributeValue struct {
