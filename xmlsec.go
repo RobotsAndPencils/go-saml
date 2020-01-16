@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	xmlResponseID = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
-	xmlRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
-	xmlLogoutRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:LogoutRequest"
+	xmlResponseID      = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
+	xmlRequestID       = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+	xmlLogoutRequestID = "urn:oasis:names:tc:SAML:2.0:protocol:LogoutRequest"
 )
 
 // SignRequest sign a SAML 2.0 AuthnRequest
@@ -133,4 +133,12 @@ func Decrypt(xml string, privateKeyPath string) ([]byte, error) {
 // Intended to be called in a defer after the creation of a temp file to ensure cleanup
 func deleteTempFile(filename string) {
 	_ = os.Remove(filename)
+}
+
+func LoadXml(certPath string) (string, error) {
+	bXML, err := ioutil.ReadFile(certPath)
+	if err != nil {
+		return "", err
+	}
+	return string(bXML), nil
 }

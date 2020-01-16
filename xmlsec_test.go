@@ -46,6 +46,6 @@ func TestResponse(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	err = VerifyRequestSignature(signedXml, "./default.crt")
+	err = VerifyResponseSignature(signedXml, "./default.crt", "")
 	assert.NoError(err)
 }
