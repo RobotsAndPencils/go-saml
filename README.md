@@ -1,3 +1,9 @@
+## Unsupported
+
+Unfortunately, the decision has been made to sunset support for this project. We thank everyone for supporting and utilizing the project. 
+
+Couple of alternatives could be https://github.com/russellhaering/gosaml2 or maybe https://github.com/crewjam/saml. These are solely suggestions to start the look for an alternative and are not an endorsement by RNP. We've not done a code review of these repos. We recommend doing a vetting pass on the repository prior to integrating any third party dependencies.
+
 go-saml
 ======
 
