@@ -1,3 +1,5 @@
+Note: This is now archived because we no longer need to maintain this fork.
+
 go-saml
 ======
 
