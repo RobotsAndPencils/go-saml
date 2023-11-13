@@ -1,0 +1,26 @@
+name: "Mark or close stale issues and PRs"
+on:
+  schedule:
+    - cron: "0 10 * * 1-5"
+
+jobs:
+  stale:
+    name: "Check for stale PRs"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Staling issues and PR's
+          days-before-stale: 15
+          stale-pr-label: stale
+          stale-pr-message: |
+            This PR has been automatically marked as stale because it has been open 15 days
+            with no activity. Remove stale label and comment on this PR or it will be closed
+            in 3 days. Setting this PR to draft will also prevent it from being closed.
+          exempt-all-milestones: true
+          exempt-draft-pr: true
+          # Time is up after 18 days
+          days-before-pr-close: 18
+          delete-branch: true
+          close-pr-message: "This PR was closed because it has been stalled for 18 days with no activity."
