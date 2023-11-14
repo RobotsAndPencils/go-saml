@@ -44,8 +44,13 @@ jobs:
         git tag -a -m "${truncated_version}" ${truncated_version}
         git push --tags
         echo "new_tag=${truncated_version}" >> $GITHUB_OUTPUT
+    - name: Checkout common-actions repo
+      uses: actions/checkout@v4
+      with:
+        repository: parsable/common-actions
+        path: ./common-actions
     - name: Release
-      uses: parsable/common-actions/release-with-changelog@v1.0.1
+      uses: ./common-actions/release-with-changelog@v1.0.1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ steps.tag.outputs.new_tag }}
