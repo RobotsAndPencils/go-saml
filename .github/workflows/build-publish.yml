@@ -21,6 +21,8 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
         fetch-depth: 0
+    - name: Install xmlsec1
+      run: sudo apt-get install -y libxmlsec1 && sudo apt-get install xmlsec1
     - name: Go Build
       run: |
         echo "machine github.com login machine-parsable password ${{ secrets.GH_PAT_MACHINE_PARSABLE }}" > ~/.netrc
