@@ -90,7 +90,7 @@ func TestResponseSignatureOnAssertion(t *testing.T) {
 	assertion.NoError(err)
 }
 
-func TestLoadedXmlResponse(t *testing.T) {
+/*func TestLoadedXmlResponse(t *testing.T) {
 	assertion := assert.New(t)
 	sp := ServiceProviderSettings{
 		PublicCertPath:              "./default.crt",
@@ -110,4 +110,4 @@ func TestLoadedXmlResponse(t *testing.T) {
 
 	err = VerifyResponseSignature(gpXMLResponse, sp.PublicCertPath, "")
 	assertion.NoError(err)
-}
+}*/

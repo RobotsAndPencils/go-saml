@@ -1,0 +1,28 @@
+# Run on branch builds
+name: CI-Go-Tests
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - main
+
+jobs:
+  go-build-test:
+    name: go build test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install xmlsec1
+      run: sudo apt-get install -y libxmlsec1 && sudo apt-get install xmlsec1
+    - name: Go Build
+      run: |
+        echo "machine github.com login machine-parsable password ${{ secrets.GH_PAT_MACHINE_PARSABLE }}" > ~/.netrc
+        go build -v -o bin/events
+    - name: Go Test
+      run: go test -v -race ./...
