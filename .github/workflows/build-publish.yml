@@ -49,8 +49,10 @@ jobs:
       with:
         repository: parsable/common-actions
         path: ./common-actions
+        token: ${{ secrets.GH_PAT_MACHINE_PARSABLE }}
+        ref: v1.0.1
     - name: Release
-      uses: ./common-actions/release-with-changelog@v1.0.1
+      uses: ./common-actions/release-with-changelog
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ steps.tag.outputs.new_tag }}
