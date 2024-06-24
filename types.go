@@ -204,6 +204,7 @@ type Assertion struct {
 	SAML               string `xml:"xmlns:saml,attr"`
 	IssueInstant       string `xml:"IssueInstant,attr"`
 	Issuer             Issuer `xml:"Issuer"`
+	Signature          Signature
 	Subject            Subject
 	Conditions         Conditions
 	AuthnStatements    []AuthnStatement `xml:"AuthnStatement,omitempty"`
