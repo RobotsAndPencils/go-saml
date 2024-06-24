@@ -13,6 +13,7 @@ init:
 	go get github.com/nu7hatch/gouuid
 	go get github.com/kardianos/osext
 	go get github.com/stretchr/testify/assert
+	go get github.com/ma314smith/signedxml
 
 vet: init
 	@echo "$(OK_COLOR)==> Go Vetting$(NO_COLOR)"
