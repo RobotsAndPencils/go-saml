@@ -6,11 +6,26 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/RobotsAndPencils/go-saml/xmlsec"
 )
 
 const (
 	xmlResponseID = "urn:oasis:names:tc:SAML:2.0:protocol:Response"
 	xmlRequestID  = "urn:oasis:names:tc:SAML:2.0:protocol:AuthnRequest"
+)
+
+var (
+	xmlResponseIDAttr = xmlsec.IDAttr{
+		Name:     "ID",
+		NodeName: "Response",
+		NsHref:   "urn:oasis:names:tc:SAML:2.0:protocol",
+	}
+	xmlRequestIDAttr = xmlsec.IDAttr{
+		Name:     "ID",
+		NodeName: "AuthnRequest",
+		NsHref:   "urn:oasis:names:tc:SAML:2.0:protocol",
+	}
 )
 
 // SignRequest sign a SAML 2.0 AuthnRequest
@@ -70,11 +85,23 @@ func VerifyResponseSignature(xml string, publicCertPath string) error {
 	return verify(xml, publicCertPath, xmlResponseID)
 }
 
+func VerifyResponseSignatureMem(doc []byte, publicCert []byte) error {
+	return xmlsec.Verify(doc, publicCert, xmlsec.Options{
+		IDAttrs: []xmlsec.IDAttr{xmlResponseIDAttr},
+	})
+}
+
 // VerifyRequestSignature verify signature of a SAML 2.0 AuthnRequest document
 // `publicCertPath` must be a path on the filesystem, xmlsec1 is run out of process
 // through `exec`
 func VerifyRequestSignature(xml string, publicCertPath string) error {
 	return verify(xml, publicCertPath, xmlRequestID)
+}
+
+func VerifyRequestSignatureMem(doc []byte, publicCert []byte) error {
+	return xmlsec.Verify(doc, publicCert, xmlsec.Options{
+		IDAttrs: []xmlsec.IDAttr{xmlRequestIDAttr},
+	})
 }
 
 func verify(xml string, publicCertPath string, id string) error {

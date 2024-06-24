@@ -6,18 +6,22 @@ import (
 	"strings"
 )
 
+var (
+	re = regexp.MustCompile("---(.*)CERTIFICATE(.*)---")
+)
+
 // LoadCertificate from file system
 func LoadCertificate(certPath string) (string, error) {
 	b, err := ioutil.ReadFile(certPath)
 	if err != nil {
 		return "", err
 	}
-	cert := string(b)
+	return SanitizeCertificate(string(b)), nil
+}
 
-	re := regexp.MustCompile("---(.*)CERTIFICATE(.*)---")
+func SanitizeCertificate(cert string) string {
 	cert = re.ReplaceAllString(cert, "")
 	cert = strings.Trim(cert, " \n")
 	cert = strings.Replace(cert, "\n", "", -1)
-
-	return cert, nil
+	return cert
 }

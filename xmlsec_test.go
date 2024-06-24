@@ -2,11 +2,20 @@ package saml
 
 import (
 	"encoding/xml"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/RobotsAndPencils/go-saml/util"
+	"github.com/RobotsAndPencils/go-saml/xmlsec"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	xmlsec.Init()
+	defer xmlsec.Shutdown()
+	os.Exit(m.Run())
+}
 
 func TestRequest(t *testing.T) {
 	assert := assert.New(t)
@@ -31,6 +40,8 @@ func TestRequest(t *testing.T) {
 
 func TestResponse(t *testing.T) {
 	assert := assert.New(t)
+	data, err := ioutil.ReadFile("./default.crt")
+	assert.NoError(err)
 	cert, err := util.LoadCertificate("./default.crt")
 	assert.NoError(err)
 
@@ -47,5 +58,8 @@ func TestResponse(t *testing.T) {
 	assert.NotEmpty(signedXml)
 
 	err = VerifyRequestSignature(signedXml, "./default.crt")
+	assert.NoError(err)
+
+	err = VerifyRequestSignatureMem([]byte(signedXml), data)
 	assert.NoError(err)
 }
